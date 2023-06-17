@@ -9,7 +9,7 @@ https://github.com/Chouette2100/SRDB
 
 ----
 
-このライブラリーを使用している（あるいは指標する予定の）プログラムは以下のものです。
+このライブラリーを使用している（あるいは使用する予定の）プログラムは以下のものです。
 
 
 https://github.com/Chouette2100/SRGSE5M
