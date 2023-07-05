@@ -5,9 +5,9 @@
 ## DBサーバーのホスト名、指定しなければlocalhost
 #DBhost:
 # データベース名
-DBname:	DBNAME
+DBname:	${DBNAME}
 #
 #
 # ログイン名とパスワードは環境変数で渡す
 DBuser:	${DBUSER}
-DBpw:	${DBPW}
+DBpswd:	${DBPW}

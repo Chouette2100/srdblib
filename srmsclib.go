@@ -19,7 +19,8 @@ import (
 	//	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/dustin/go-humanize"
-	//	"github.com/Chouette2100/srapi"
+
+	"github.com/Chouette2100/exsrapi"
 )
 
 func SelectEventNoAndName(eventid string) (
@@ -30,7 +31,7 @@ func SelectEventNoAndName(eventid string) (
 
 	status = 0
 
-	err := Db.QueryRow("select event_name, period from event where eventid ='"+eventid+"'").Scan(&eventname, &period)
+	err := Db.QueryRow("select event_name, period from " + Tevent + " where eventid ='"+eventid+"'").Scan(&eventname, &period)
 
 	if err == nil {
 		return
@@ -416,7 +417,7 @@ func UpdatePointsSetQstatus(
 func MakePointPerSlot(eventid string) (perslotinflist []PerSlotInf, status int) {
 
 	var perslotinf PerSlotInf
-	var event_inf Event_Inf
+	var event_inf exsrapi.Event_Inf
 
 	status = 0
 

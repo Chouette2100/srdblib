@@ -6,18 +6,21 @@ https://opensource.org/licenses/mit-license.php
 package srdblib
 
 import (
-
-
 	"time"
+
+	"github.com/Chouette2100/exsrapi"
 
 )
 
 /*
 Ver.00AA00	srdblibを導入する（データベースアクセスを一本化する）
+		Event_InfにAchkを追加する（wevent用）
+	01AA00	SSHConfigをDBConfigに統合し、DBConfigのファイル読み込みもこの関数内で行う
 */
 
-const Version = "00AA00"
+const Version = "01AA00"
 
+/*
 type Event_Inf struct {
 	Event_ID    string
 	I_Event_ID  int
@@ -46,7 +49,7 @@ type Event_Inf struct {
 	Maxpoint    int
 	MaxPoint    int	//	DBには該当するものはない
 	Gscale    int	//	DBのMaxpoint = 構造体の Maxpoint + Gscale
-	//	achk		int
+	Achk		int	//	1: ブロック、2:ボックス、子ルーム未処理のあいだはそれぞれ +4
 	//	aclr		int
 
 	//	Event_no    int
@@ -56,6 +59,7 @@ type Event_Inf struct {
 	League_ids  string
 	//	Status		string		//	"Confirmed":	イベント終了日翌日に確定した獲得ポイントが反映されている。
 }
+*/
 
 type Color struct {
 	Name  string
@@ -191,6 +195,6 @@ type PerSlotInf struct {
 	Perslotlist []PerSlot
 }
 
-var Event_inf Event_Inf
+var Event_inf exsrapi.Event_Inf
 
 
