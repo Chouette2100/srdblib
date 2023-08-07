@@ -1,5 +1,5 @@
 /*!
-Copyright © 2022 chouette.21.00@gmail.com
+Copyright © 2023 chouette.21.00@gmail.com
 Released under the MIT license
 https://opensource.org/licenses/mit-license.php
 */
@@ -16,9 +16,10 @@ import (
 Ver.00AA00	srdblibを導入する（データベースアクセスを一本化する）
 		Event_InfにAchkを追加する（wevent用）
 	01AA00	SSHConfigをDBConfigに統合し、DBConfigのファイル読み込みもこの関数内で行う
+	01AB00	CGIでイベントリストを操作の基本にすることとSRGCEの機能強化に関わる変更
 */
 
-const Version = "01AA00"
+const Version = "01AB00"
 
 /*
 type Event_Inf struct {

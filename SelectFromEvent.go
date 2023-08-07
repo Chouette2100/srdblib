@@ -16,13 +16,10 @@ func SelectFromEvent(eventid string) (
 
 	eventinf := exsrapi.Event_Inf{}
 	peventinf = &eventinf
-	log.Printf("eventid=[%s]\n", eventid)
-	log.Printf("eventinf=[%v]\n", eventinf)
 
 	sql := "select eventid,ieventid,event_name, period, starttime, endtime, noentry, intervalmin, modmin, modsec, "
 	sql += " Fromorder, Toorder, Resethh, Resetmm, Nobasis, Maxdsp, cmap, target, `rstatus`, maxpoint "
 	sql += " from " + Tevent + " where eventid = ?"
-	log.Printf("sql=[%s]\n", sql)
 	Dberr = Db.QueryRow(sql, eventid).Scan(
 		&eventinf.Event_ID,
 		&eventinf.I_Event_ID,
@@ -54,6 +51,7 @@ func SelectFromEvent(eventid string) (
 			err = fmt.Errorf("row.Exec(): %w", Dberr)
 			log.Printf("%s\n", sql)
 			log.Printf("err=[%v]\n", err)
+			return
 		}
 	}
 
@@ -70,7 +68,7 @@ func SelectFromEvent(eventid string) (
 	eventinf.Gscale = eventinf.Maxpoint % 1000
 	eventinf.Maxpoint = eventinf.Maxpoint - eventinf.Gscale
 
-	log.Printf("eventinf=[%v]\n", eventinf)
+	//	log.Printf("eventinf=[%v]\n", eventinf)
 
 	//	log.Printf("Start_data=%f Dperiod=%f\n", eventinf.Start_date, eventinf.Dperiod)
 

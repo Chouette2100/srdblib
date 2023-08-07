@@ -1,3 +1,8 @@
+/*!
+Copyright © 2023 chouette.21.00@gmail.com
+Released under the MIT license
+https://opensource.org/licenses/mit-license.php
+*/
 package srdblib
 
 import (
@@ -10,13 +15,24 @@ import (
 	"github.com/Chouette2100/exsrapi"
 )
 
-func InsertEventinflistToEvent(eventinflist *[]exsrapi.Event_Inf, bcheck bool) (
+/*
+イベント情報リストをイベントテーブルに格納する。
+格納できたときは (*eventinflist)[i].Valid = false とする。
+格納できないときは (*eventinflist)[i].Valid = true とする。
+(*eventinflist)[i].Valid はイベント情報とは無関係で
+処理の状況を示すために使われる。
+*/
+func InsertEventinflistToEvent(
+	tevent	string,	//	insertするテーブル
+	eventinflist *[]exsrapi.Event_Inf, //	イベント情報リスト
+	bcheck bool, //	true:	キーが同一のレコードの存在チェックを行う
+) (
 	err error,
 ) {
 
 	var stmt *sql.Stmt
 
-	sql := "INSERT INTO " + Tevent + " (eventid, ieventid, event_name, period, starttime, endtime, noentry,"
+	sql := "INSERT INTO " + tevent + " (eventid, ieventid, event_name, period, starttime, endtime, noentry,"
 	sql += " intervalmin, modmin, modsec, "
 	sql += " fromorder, toorder, resethh, resetmm, nobasis, maxdsp, cmap, target, rstatus, maxpoint, achk" //, aclr	未使用
 	sql += ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
@@ -28,19 +44,18 @@ func InsertEventinflistToEvent(eventinflist *[]exsrapi.Event_Inf, bcheck bool) (
 	}
 	defer stmt.Close()
 
-	for _, eventinf := range *eventinflist {
+	for i, eventinf := range *eventinflist {
 		//	存在確認
 		nrow := 0
 		if bcheck {
-
-			if Dberr := Db.QueryRow("select count(*) from "+Tevent+" where eventid = ?", eventinf.Event_ID).Scan(&nrow); Dberr != nil {
+			if Dberr := Db.QueryRow("select count(*) from "+tevent+" where eventid = ?", eventinf.Event_ID).Scan(&nrow); Dberr != nil {
 				err = fmt.Errorf("QeryRow().Scan(): %w", Dberr)
 				return
 			}
 		}
 
 		if bcheck && nrow == 0 || !bcheck && eventinf.Valid {
-			//	同一のeventidのデータが存在しない。
+			//	同一のeventidのデータが存在しないのでデータを格納する。
 			_, Dberr = stmt.Exec(
 				eventinf.Event_ID,
 				eventinf.I_Event_ID,
@@ -70,6 +85,9 @@ func InsertEventinflistToEvent(eventinflist *[]exsrapi.Event_Inf, bcheck bool) (
 				return
 			}
 			log.Printf("  **Inserted: %-30s %s\n", eventinf.Event_ID, eventinf.Event_name)
+			(*eventinflist)[i].Valid = false
+		} else {
+			(*eventinflist)[i].Valid = true
 		}
 	}
 
