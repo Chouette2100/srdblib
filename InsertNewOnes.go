@@ -1,3 +1,8 @@
+/*!
+Copyright © 2024 chouette.21.00@gmail.com
+Released under the MIT license
+https://opensource.org/licenses/mit-license.php
+*/
 package srdblib
 
 import (
@@ -14,6 +19,10 @@ import (
 	"github.com/Chouette2100/srapi"
 )
 
+//	日本語名のジャンルを英語名に変換する
+//
+//	v1.1.1 ジャンルの省略名は使わないようにする
+//
 func ConverGenre2Abbr(
 	genre string,
 ) (
@@ -24,14 +33,20 @@ func ConverGenre2Abbr(
 		abbr = "Free"
 	case "アイドル":
 		abbr = "Idol"
-	case "Talent Model", "タレント・モデル":
-		abbr = "Tl/Md"
+	//	case "Talent Model", "タレント・モデル":
+	//		abbr = "Tl/Md"
+	case "タレント・モデル":
+		abbr = "Talent Model"
 	case "ミュージック":
 		abbr = "Music"
-	case "Voice Actors & Anime", "声優・アニメ":
-		abbr = "VA&A"
-	case "Comedians/Talk Show", "お笑い・トーク":
-		abbr = "Cm/TS"
+	//	case "Voice Actors & Anime", "声優・アニメ":
+	//		abbr = "VA&A"
+	case "声優・アニメ":
+		abbr = "Voice Actors & Anime"
+	//	case "Comedians/Talk Show", "お笑い・トーク":
+	//		abbr = "Cm/TS"
+	case "お笑い・トーク":
+		abbr = "Comedians/Talk Show"
 	case "バーチャル":
 		abbr = "Virtual"
 	default:
