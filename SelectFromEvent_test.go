@@ -13,6 +13,7 @@ import (
 
 func TestSelectFromEvent(t *testing.T) {
 	type args struct {
+		tevent string
 		eventid string
 	}
 
@@ -27,6 +28,7 @@ func TestSelectFromEvent(t *testing.T) {
 		{
 			name: "test1",
 			args: args{
+				tevent: "wevent",
 				eventid: "puzzle01",
 			},
 			wantPeventinf: &exsrapi.Event_Inf{
@@ -70,7 +72,7 @@ func TestSelectFromEvent(t *testing.T) {
 		// TODO: Add test cases.
 	}
 
-	Tevent = "wevent"
+	//	Tevent = "wevent"
 
 	logfile, err := exsrapi.CreateLogfile("SelectFromEvent_testg")
 	if err != nil {
@@ -94,7 +96,7 @@ func TestSelectFromEvent(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotPeventinf, err := SelectFromEvent(tt.args.eventid)
+			gotPeventinf, err := SelectFromEvent(tt.args.tevent, tt.args.eventid)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SelectFromEvent() error = %v, wantErr %v", err, tt.wantErr)
 				return

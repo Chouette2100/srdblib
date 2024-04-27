@@ -8,8 +8,10 @@ import (
 	"github.com/Chouette2100/exsrapi"
 )
 
-
-func SelectFromEvent(eventid string) (
+func SelectFromEvent(
+	tevent string,
+	eventid string,
+) (
 	peventinf *exsrapi.Event_Inf,
 	err error,
 ) {
@@ -19,7 +21,7 @@ func SelectFromEvent(eventid string) (
 
 	sql := "select eventid,ieventid,event_name, period, starttime, endtime, noentry, intervalmin, modmin, modsec, "
 	sql += " Fromorder, Toorder, Resethh, Resetmm, Nobasis, Maxdsp, cmap, target, `rstatus`, maxpoint "
-	sql += " from " + Tevent + " where eventid = ?"
+	sql += " from " + tevent + " where eventid = ?"
 	Dberr = Db.QueryRow(sql, eventid).Scan(
 		&eventinf.Event_ID,
 		&eventinf.I_Event_ID,

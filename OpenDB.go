@@ -50,10 +50,10 @@ var Dialer sshql.Dialer
 var Db *sql.DB  //  プログラム中では一貫してこの変数を使うこと
 var Dberr error //  プログラム中では一貫してこの変数を使うこと
 
-var Tevent = "event"
-var Teventuser = "eventuser"
-var Tuser = "user"
-var Tuserhistory = "userhistory"
+//	var Tevent = "event"
+//	var Teventuser = "eventuser"
+//	var Tuser = "user"
+//	var Tuserhistory = "userhistory"
 
 
 func OpenDb(filenameofdbconfig string) (dbconfig *DBConfig, err error) {

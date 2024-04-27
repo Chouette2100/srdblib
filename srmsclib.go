@@ -23,7 +23,7 @@ import (
 	"github.com/Chouette2100/exsrapi"
 )
 
-func SelectEventNoAndName(eventid string) (
+func SelectEventNoAndName(tevent, eventid string) (
 	eventname string,
 	period string,
 	status int,
@@ -31,7 +31,7 @@ func SelectEventNoAndName(eventid string) (
 
 	status = 0
 
-	err := Db.QueryRow("select event_name, period from " + Tevent + " where eventid ='"+eventid+"'").Scan(&eventname, &period)
+	err := Db.QueryRow("select event_name, period from " + tevent + " where eventid ='"+eventid+"'").Scan(&eventname, &period)
 
 	if err == nil {
 		return
@@ -49,6 +49,7 @@ func SelectEventNoAndName(eventid string) (
 
 
 func SelectEventRoomInfList(
+	tevent string,
 	eventid string,
 	roominfolist *RoomInfoList,
 ) (
@@ -62,7 +63,7 @@ func SelectEventRoomInfList(
 	//	eventno, eventname, _ = SelectEventNoAndName(eventid)
 	//	Event_inf, _ = SelectEventInf(eventid)
 	//	Event_inf, _ = SelectFromEvent(eventid)
-	eventinf, err := SelectFromEvent(eventid)
+	eventinf, err := SelectFromEvent(tevent, eventid)
 	if err != nil {
 		//	DBの処理でエラーが発生した。
 		status = -1
@@ -414,7 +415,7 @@ func UpdatePointsSetQstatus(
 	return
 }
 
-func MakePointPerSlot(eventid string) (perslotinflist []PerSlotInf, status int) {
+func MakePointPerSlot(tevent, eventid string) (perslotinflist []PerSlotInf, status int) {
 
 	var perslotinf PerSlotInf
 	var event_inf exsrapi.Event_Inf
@@ -423,11 +424,11 @@ func MakePointPerSlot(eventid string) (perslotinflist []PerSlotInf, status int) 
 
 	event_inf.Event_ID = eventid
 	//	eventno, eventname, period := SelectEventNoAndName(eventid)
-	eventname, period, _ := SelectEventNoAndName(eventid)
+	eventname, period, _ := SelectEventNoAndName(tevent, eventid)
 
 	var roominfolist RoomInfoList
 
-	_, sts := SelectEventRoomInfList(eventid, &roominfolist)
+	_, sts := SelectEventRoomInfList(tevent, eventid, &roominfolist)
 
 	if sts != 0 {
 		log.Printf("status of SelectEventRoomInfList() =%d\n", sts)
