@@ -18,9 +18,10 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AA00	SSHConfigをDBConfigに統合し、DBConfigのファイル読み込みもこの関数内で行う
 	01AB00	CGIでイベントリストを操作の基本にすることとSRGCEの機能強化に関わる変更
 	01AC00	操作対象のテーブルをsrdblib.Teventで指定する方法から関数の引数とする方法に変える
+	01AD00	gorpを導入(OpenDB.go)し、User.goとPoints.goを追加する。
 */
 
-const Version = "01AC00"
+const Version = "01AD00"
 
 /*
 type Event_Inf struct {

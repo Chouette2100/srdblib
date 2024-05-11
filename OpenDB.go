@@ -18,6 +18,8 @@ import (
 	//	"github.com/PuerkitoBio/goquery"
 	//	"github.com/dustin/go-humanize"
 
+	"github.com/go-gorp/gorp"
+
 	"github.com/Chouette2100/exsrapi"
 	//	ghsrapi "github.com/Chouette2100/srapi"
 )
@@ -49,6 +51,7 @@ type DBConfig struct {
 var Dialer sshql.Dialer
 var Db *sql.DB  //  プログラム中では一貫してこの変数を使うこと
 var Dberr error //  プログラム中では一貫してこの変数を使うこと
+var Dbmap *gorp.DbMap
 
 //	var Tevent = "event"
 //	var Teventuser = "eventuser"
