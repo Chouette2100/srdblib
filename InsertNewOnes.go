@@ -88,6 +88,7 @@ func InsertNewOnes(
 	}
 
 	if nrow == 0 {
+		//	eventuser に対象ルームが存在しないとき
 		//	log.Printf("  =====Insert into eventuser userno=%d, eventid=%s\n", userno, eventid)
 		var stmt *sql.Stmt
 		sqli := "INSERT INTO eventuser(eventid, userno, istarget, graph, color, iscntrbpoints, point) VALUES(?,?,?,?,?,?,?)"
@@ -142,6 +143,7 @@ func InsertNewOnes(
 		}
 
 		if nrowu == 0 {
+			//	（eventuser に対象ルームが存在せず） userにも対象ルームが存在しないとき
 
 			shortname := fmt.Sprintf("%d", userno)
 			shortname = shortname[len(shortname)-2:]
@@ -221,6 +223,7 @@ func InsertNewOnes(
 		log.Printf("   **** update user.\n")
 
 	} else {
+		//	eventuser に対象ルームが存在するとき
 		//	log.Printf("  =====Update eventuser userno=%d, eventid=%s\n", userno, eventid)
 		var stmtu *sql.Stmt
 		sqlu := "UPDATE eventuser SET istarget=? where eventid=? and userno=?"
