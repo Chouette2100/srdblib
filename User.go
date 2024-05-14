@@ -1,3 +1,9 @@
+/*
+!
+Copyright © 2024 chouette.21.00@gmail.com
+Released under the MIT license
+https://opensource.org/licenses/mit-license.php
+*/
 package srdblib
 
 import (
@@ -5,8 +11,8 @@ import (
 	//	"io"
 	"log"
 	//	"os"
-	"strings"
 	"strconv"
+	"strings"
 	"time"
 
 	"net/http"
@@ -108,8 +114,40 @@ func MakeSortKeyOfRank(rank string, nextscore int) (
 }
 
 /*
+ルーム番号 user.Userno が テーブル user に存在しないときは新しいデータを挿入し、存在するときは 既存のデータを更新する。
+*/
+func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User) (
+	err error,
+) {
 
-	テーブル user を SHOWROOMのAPI api/roomprofile を使って得られる情報で更新する。
+	row, err := Dbmap.Get(User{}, user.Userno)
+	if err != nil {
+		err = fmt.Errorf("Get(userno=%d) returned error. %w", user.Userno, err)
+		return err
+	} else {
+		if row == nil {
+			err = InsertIntoUser(client, tnow, user.Userno)
+			if err != nil {
+				err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", user.Userno, err)
+			}
+		} else {
+			usert := row.(*User)
+			//	if usert.Ts.After(tnow.Add(-12 * time.Hour)) {
+			if usert.Ts.After(tnow.Add(-12 * time.Second)) {
+				log.Printf("UpinsUserSetProperty(userno=%d %s) skipped. %v", user.Userno, usert.User_name, usert.Ts)
+				return nil
+			}
+			err = UpdateUserSetProperty(client, tnow, usert)
+			if err != nil {
+				err = fmt.Errorf("UpdateUserSetProperty(userno=%d) returned error. %w", user.Userno, err)
+			}
+		}
+	}
+	return
+}
+
+/*
+テーブル user を SHOWROOMのAPI api/roomprofile を使って得られる情報で更新する。
 */
 func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 	err error,
@@ -134,11 +172,11 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 		return err
 	}
 
-	//	user.Userno =
+	//	user.Userno =	キー
 	user.Userid = ria.RoomURLKey
 	user.User_name = ria.RoomName
-	//	user.Longname =
-	//	user.Shortname =
+	//	user.Longname =		新規作成時に設定され、変更はSRCGIで行う
+	//	user.Shortname =　　〃
 	user.Genre = ria.GenreName
 	user.GenreID = ria.GenreID
 	user.Rank = ria.ShowRankSubdivided
@@ -169,12 +207,12 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 		err = fmt.Errorf("ApiActivefanRoom(%d) returned error. %w", user.Userno, err)
 		return err
 	}
-	user.Fans_lst= pafr.TotalUserCount
-	user.FanPower_lst= pafr.FanPower
+	user.Fans_lst = pafr.TotalUserCount
+	user.FanPower_lst = pafr.FanPower
 
 	user.Ts = tnow
 	//	user.Getp =		ここから三つのフィールドは現在使われていない。
-	//	user.Graph =
+	//	user.Graph =	default: ''
 	//	user.Color =
 	eurl := ria.Event.URL
 	eurla := strings.Split(eurl, "/")
@@ -188,13 +226,12 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 	}
 	//	log.Printf("cnt = %d\n", cnt)
 
-	log.Printf("userno=%d rank=%s nscore=%d pscore=%d longname=%s\n", user.Userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
+	log.Printf("UPDATE userno=%d rank=%s nscore=%d pscore=%d longname=%s\n", user.Userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
 	return
 }
 
 /*
-
-	テーブル user に新しいデータを追加する
+テーブル user に新しいデータを追加する
 */
 func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 	err error,
@@ -256,11 +293,11 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 		err = fmt.Errorf("ApiActivefanRoom(%d) returned error. %w", user.Userno, err)
 		return err
 	}
-	user.Fans_lst= pafr.TotalUserCount
-	user.FanPower_lst= pafr.FanPower
+	user.Fans_lst = pafr.TotalUserCount
+	user.FanPower_lst = pafr.FanPower
 
 	user.Ts = tnow
-	user.Getp =	""
+	user.Getp = ""
 	user.Graph = ""
 	user.Color = ""
 	eurl := ria.Event.URL
@@ -275,7 +312,6 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 	}
 	//	log.Printf("cnt = %d\n", cnt)
 
-	log.Printf("userno=%d rank=%s nscore=%d pscore=%d longname=%s\n", user.Userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
+	log.Printf("INSERTE userno=%d rank=%s nscore=%d pscore=%d longname=%s\n", user.Userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
 	return
 }
-

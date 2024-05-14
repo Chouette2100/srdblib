@@ -20,9 +20,10 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AC00	操作対象のテーブルをsrdblib.Teventで指定する方法から関数の引数とする方法に変える
 	01AD00	gorpを導入(OpenDB.go)し、User.goとPoints.goを追加する。
 	01AD00a	InsertNewOnes.go にコメントを追加する。
+	01AE00	user.goにUpinsUserSetProperty()を追加する。
 */
 
-const Version = "01AD00a"
+const Version = "01AE00"
 
 /*
 type Event_Inf struct {
