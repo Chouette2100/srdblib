@@ -1,4 +1,5 @@
-/*!
+/*
+!
 Copyright © 2024 chouette.21.00@gmail.com
 Released under the MIT license
 https://opensource.org/licenses/mit-license.php
@@ -19,10 +20,9 @@ import (
 	"github.com/Chouette2100/srapi"
 )
 
-//	日本語名のジャンルを英語名に変換する
+// 日本語名のジャンルを英語名に変換する
 //
-//	v1.1.1 ジャンルの省略名は使わないようにする
-//
+// v1.1.1 ジャンルの省略名は使わないようにする
 func ConverGenre2Abbr(
 	genre string,
 ) (
@@ -135,92 +135,125 @@ func InsertNewOnes(
 		log.Printf("   **** insert into points.\n")
 
 		nrowu := 0
-		sqlscu := "select count(*) from user where userno =?"
-		Dberr = Db.QueryRow(sqlscu, userno).Scan(&nrowu)
-		if Dberr != nil {
-			err = fmt.Errorf("Db.QueryRow(sqlscu, userno).Scan(&nrow): %w", Dberr)
-			return
+		/*
+			sqlscu := "select count(*) from user where userno =?"
+			Dberr = Db.QueryRow(sqlscu, userno).Scan(&nrowu)
+			if Dberr != nil {
+				err = fmt.Errorf("Db.QueryRow(sqlscu, userno).Scan(&nrow): %w", Dberr)
+				return
+			}
+		*/
+		var row interface{}
+		row, err = Dbmap.Get(User{}, userno)
+		if err != nil {
+			err = fmt.Errorf("Get(userno=%d) returned error. %w", userno, err)
+			return err
+		}
+		if row != nil {
+			nrowu = 1
 		}
 
 		if nrowu == 0 {
 			//	（eventuser に対象ルームが存在せず） userにも対象ルームが存在しないとき
 
-			shortname := fmt.Sprintf("%d", userno)
-			shortname = shortname[len(shortname)-2:]
-			sqliu := "insert into user (userno, userid, user_name, longname, shortname, currentevent, ts) values(?,?,?,?,?,?,?)"
-			_, Dberr = Db.Exec(
-				sqliu,
-				userno,
-				room.Room_url_key,
-				room.Room_name,
-				room.Room_name,
-				shortname,
-				eventid,
-				tnow,
-			)
-			if Dberr != nil {
-				err = fmt.Errorf("Db.Exec(sqliu,...): %w", Dberr)
+			/*
+				shortname := fmt.Sprintf("%d", userno)
+				shortname = shortname[len(shortname)-2:]
+				sqliu := "insert into user (userno, userid, user_name, longname, shortname, currentevent, ts) values(?,?,?,?,?,?,?)"
+				_, Dberr = Db.Exec(
+					sqliu,
+					userno,
+					room.Room_url_key,
+					room.Room_name,
+					room.Room_name,
+					shortname,
+					eventid,
+					tnow,
+				)
+				if Dberr != nil {
+					err = fmt.Errorf("Db.Exec(sqliu,...): %w", Dberr)
+					return
+				}
+			*/
+			//	user テーブルにusernoのデータを新たに作成する
+			err = InsertIntoUser(client, tnow, userno)
+			if err != nil {
+				err = fmt.Errorf("InsertIntoUser(client, tnow, userno): %w", err)
 				return
 			}
 			log.Printf("   **** insert into user.\n")
 
 		} else {
+			//	（eventuser に対象ルームが存在しないが） userには対象ルームが存在する
 			log.Printf("   **** user already exists.\n")
+
+			/*
+			puser := row.(*User)
+			err = UpdateUserSetProperty(client, tnow, puser)
+			if err != nil {
+				err = fmt.Errorf("UpdateUserSetProperty(client, tnow, puser): %w", err)
+				return
+			}
+
+			log.Printf("   **** update user.\n")
+			*/
 		}
 
-		//	ルーム情報を最新にする。
-		var roominf srapi.RoomInf
-		roominf, err = srapi.ApiRoomProfile(client, fmt.Sprintf("%d", room.Room_id))
-		if err != nil {
-			err = fmt.Errorf("srapi.ApiRoomProfile(): %w", err)
-			return
-		}
+		/*
+			//	ルーム情報を最新にする。
+			var roominf srapi.RoomInf
+			roominf, err = srapi.ApiRoomProfile(client, fmt.Sprintf("%d", room.Room_id))
+			if err != nil {
+				err = fmt.Errorf("srapi.ApiRoomProfile(): %w", err)
+				return
+			}
 
-		roominf.Genre = ConverGenre2Abbr(roominf.Genre)
+			roominf.Genre = ConverGenre2Abbr(roominf.Genre)
 
-		var stmtuu *sql.Stmt
-		sqluu := "UPDATE user SET "
-		sqluu += "  userid=? "
-		sqluu += ", user_name=? "
-		sqluu += ", genre=? "
-		sqluu += ", `rank`=? "
-		sqluu += ", nrank=? "
-		sqluu += ", prank=? "
-		sqluu += ", level=? "
-		sqluu += ", followers=? "
-		sqluu += ", fans=? "
-		sqluu += ", fans_lst=? "
-		sqluu += ", currentevent=? "
-		sqluu += ", ts=? "
-		sqluu += " where userno=?"
-		stmtuu, err = Db.Prepare(sqluu)
-		if err != nil {
-			log.Printf("error(UPDATE/Prepare) err=%s\n", err.Error())
-			err = fmt.Errorf("Db.Prepare(sqluu): %w", Dberr)
-			return
-		}
-		defer stmtuu.Close()
-		_, Dberr = stmtuu.Exec(
-			roominf.Account,
-			roominf.Name,
-			roominf.Genre,
-			roominf.Rank,
-			roominf.Nrank,
-			roominf.Prank,
-			roominf.Level,
-			roominf.Followers,
-			roominf.Fans,
-			roominf.Fans_lst,
-			eventid,
-			tnow,
-			userno,
-		)
-		if Dberr != nil {
-			log.Printf("error(InsertIntoOrUpdateUser() UPDATE/Exec) err=%s\n", Dberr.Error())
-			err = fmt.Errorf("stmtuu.Exec(): %w", Dberr)
-			return
-		}
-		log.Printf("   **** update user.\n")
+			var stmtuu *sql.Stmt
+			sqluu := "UPDATE user SET "
+			sqluu += "  userid=? "
+			sqluu += ", user_name=? "
+			sqluu += ", genre=? "
+			sqluu += ", `rank`=? "
+			sqluu += ", nrank=? "
+			sqluu += ", prank=? "
+			sqluu += ", level=? "
+			sqluu += ", followers=? "
+			sqluu += ", fans=? "
+			sqluu += ", fans_lst=? "
+			sqluu += ", currentevent=? "
+			sqluu += ", ts=? "
+			sqluu += " where userno=?"
+			stmtuu, err = Db.Prepare(sqluu)
+			if err != nil {
+				log.Printf("error(UPDATE/Prepare) err=%s\n", err.Error())
+				err = fmt.Errorf("Db.Prepare(sqluu): %w", Dberr)
+				return
+			}
+			defer stmtuu.Close()
+			_, Dberr = stmtuu.Exec(
+				roominf.Account,
+				roominf.Name,
+				roominf.Genre,
+				roominf.Rank,
+				roominf.Nrank,
+				roominf.Prank,
+				roominf.Level,
+				roominf.Followers,
+				roominf.Fans,
+				roominf.Fans_lst,
+				eventid,
+				tnow,
+				userno,
+			)
+			if Dberr != nil {
+				log.Printf("error(InsertIntoOrUpdateUser() UPDATE/Exec) err=%s\n", Dberr.Error())
+				err = fmt.Errorf("stmtuu.Exec(): %w", Dberr)
+				return
+			}
+			log.Printf("   **** update user.\n")
+		*/
 
 	} else {
 		//	eventuser に対象ルームが存在するとき

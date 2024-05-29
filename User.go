@@ -116,7 +116,7 @@ func MakeSortKeyOfRank(rank string, nextscore int) (
 /*
 ルーム番号 user.Userno が テーブル user に存在しないときは新しいデータを挿入し、存在するときは 既存のデータを更新する。
 */
-func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User) (
+func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User, lmin int) (
 	err error,
 ) {
 
@@ -132,15 +132,16 @@ func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 			}
 		} else {
 			usert := row.(*User)
-			//	if usert.Ts.After(tnow.Add(-12 * time.Hour)) {
-			if usert.Ts.After(tnow.Add(-12 * time.Second)) {
-				log.Printf("UpinsUserSetProperty(userno=%d %s) skipped. %v", user.Userno, usert.User_name, usert.Ts)
+			//	lastrank := usert.Rank
+			if usert.Ts.After(tnow.Add(time.Duration(-lmin) * time.Minute)) {
+				log.Printf("skipped. UpinsUserSetProperty(userno=%d rank=%s %s)  %v", user.Userno, usert.Rank, usert.User_name, usert.Ts)
 				return nil
 			}
 			err = UpdateUserSetProperty(client, tnow, usert)
 			if err != nil {
 				err = fmt.Errorf("UpdateUserSetProperty(userno=%d) returned error. %w", user.Userno, err)
 			}
+			//	log.Printf("UpinsUserSetProperty(userno=%d %s) lastrank=%s -> %s", user.Userno, usert.User_name, lastrank, usert.Rank)
 		}
 	}
 	return
@@ -152,6 +153,8 @@ func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 	err error,
 ) {
+
+	lastrank := user.Rank
 
 	//	ユーザーのランク情報を取得する
 	ria, err := srapi.ApiRoomProfileAll(client, fmt.Sprintf("%d", user.Userno))
@@ -185,7 +188,9 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 	user.Irank = MakeSortKeyOfRank(ria.ShowRankSubdivided, ria.NextScore)
 	user.Inrank = ria.NextScore
 	user.Iprank = ria.PrevScore
-	user.Itrank = 0
+	if user.Itrank < user.Irank {
+		user.Itrank = user.Irank
+	}
 	user.Level = ria.RoomLevel
 	user.Followers = ria.FollowerNum
 
@@ -226,7 +231,7 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 	}
 	//	log.Printf("cnt = %d\n", cnt)
 
-	log.Printf("UPDATE userno=%d rank=%s nscore=%d pscore=%d longname=%s\n", user.Userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
+	log.Printf("UPDATE userno=%d rank=%s -> %s nscore=%d pscore=%d longname=%s\n", user.Userno, lastrank, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
 	return
 }
 
@@ -271,7 +276,7 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 	user.Irank = MakeSortKeyOfRank(ria.ShowRankSubdivided, ria.NextScore)
 	user.Inrank = ria.NextScore
 	user.Iprank = ria.PrevScore
-	user.Itrank = 0
+	user.Itrank = user.Irank
 	user.Level = ria.RoomLevel
 	user.Followers = ria.FollowerNum
 
@@ -312,6 +317,6 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 	}
 	//	log.Printf("cnt = %d\n", cnt)
 
-	log.Printf("INSERTE userno=%d rank=%s nscore=%d pscore=%d longname=%s\n", user.Userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
+	log.Printf("INSERT userno=%d rank=%s nscore=%d pscore=%d longname=%s\n", user.Userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
 	return
 }
