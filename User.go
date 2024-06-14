@@ -116,7 +116,7 @@ func MakeSortKeyOfRank(rank string, nextscore int) (
 /*
 ルーム番号 user.Userno が テーブル user に存在しないときは新しいデータを挿入し、存在するときは 既存のデータを更新する。
 */
-func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User, lmin int) (
+func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User, lmin int, wait int) (
 	err error,
 ) {
 
@@ -143,7 +143,9 @@ func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User, lmin 
 			}
 			//	log.Printf("UpinsUserSetProperty(userno=%d %s) lastrank=%s -> %s", user.Userno, usert.User_name, lastrank, usert.Rank)
 		}
+		time.Sleep(time.Duration(wait) * time.Millisecond)
 	}
+
 	return
 }
 
@@ -188,7 +190,7 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 	user.Irank = MakeSortKeyOfRank(ria.ShowRankSubdivided, ria.NextScore)
 	user.Inrank = ria.NextScore
 	user.Iprank = ria.PrevScore
-	if user.Itrank < user.Irank {
+	if user.Itrank > user.Irank {
 		user.Itrank = user.Irank
 	}
 	user.Level = ria.RoomLevel
