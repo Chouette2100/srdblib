@@ -20,7 +20,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 
-	"github.com/Chouette2100/exsrapi"
+	//	"github.com/Chouette2100/exsrapi"
 )
 
 func SelectEventNoAndName(tevent, eventid string) (
@@ -418,11 +418,11 @@ func UpdatePointsSetQstatus(
 func MakePointPerSlot(tevent, eventid string) (perslotinflist []PerSlotInf, status int) {
 
 	var perslotinf PerSlotInf
-	var event_inf exsrapi.Event_Inf
+	//	var event_inf exsrapi.Event_Inf
 
 	status = 0
 
-	event_inf.Event_ID = eventid
+	//	event_inf.Event_ID = eventid
 	//	eventno, eventname, period := SelectEventNoAndName(eventid)
 	eventname, period, _ := SelectEventNoAndName(tevent, eventid)
 

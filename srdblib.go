@@ -24,9 +24,10 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AF00	InsertNewOnes()にgorpを適用する。
 	01AG00	InsertNewOnes()でuserのUPDATEは行わない（userのUPDATEは定期的に行う）
 	01AG01	 UpinsUserSetProperty()でウェイトができるようにする（srapi.ApiRoomProfileAll()の実行頻度に制限がある模様）
+	01AH00	 srapi.ApiRoomProfileAll()の関数名をsrapi.ApiRoomProfile()としたことに対応する。
 */
 
-const Version = "01AG01"
+const Version = "01AH00"
 
 /*
 type Event_Inf struct {

@@ -159,7 +159,7 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 	lastrank := user.Rank
 
 	//	ユーザーのランク情報を取得する
-	ria, err := srapi.ApiRoomProfileAll(client, fmt.Sprintf("%d", user.Userno))
+	ria, err := srapi.ApiRoomProfile(client, fmt.Sprintf("%d", user.Userno))
 	if err != nil {
 		err = fmt.Errorf("ApiRoomProfile_All(%d) returned error. %w", user.Userno, err)
 		return err
@@ -245,7 +245,7 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 ) {
 
 	//	ユーザーのランク情報を取得する
-	ria, err := srapi.ApiRoomProfileAll(client, fmt.Sprintf("%d", userno))
+	ria, err := srapi.ApiRoomProfile(client, fmt.Sprintf("%d", userno))
 	if err != nil {
 		err = fmt.Errorf("ApiRoomProfile_All(%d) returned error. %w", userno, err)
 		return err
