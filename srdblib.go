@@ -26,9 +26,11 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AG01	UpinsUserSetProperty()でウェイトができるようにする（srapi.ApiRoomProfileAll()の実行頻度に制限がある模様）
 	01AH00	srapi.ApiRoomProfileAll()の関数名をsrapi.ApiRoomProfile()としたことに対応する。
 	01AJ00	Event.goを追加する。User.goにwuserと関連関数を追加する。
+	01AK00	Timetable.goを追加する。
+	01AL00	GetEventsRankingByApi.goを追加する。
 */
 
-const Version = "01AH00"
+const Version = "01AL00"
 
 /*
 type Event_Inf struct {
