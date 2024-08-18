@@ -28,9 +28,10 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AJ00	Event.goを追加する。User.goにwuserと関連関数を追加する。
 	01AK00	Timetable.goを追加する。
 	01AL00	GetEventsRankingByApi.goを追加する。
+	01AL01	GetEventsRankingByApi()の引数にmode（1: イベント開催中、2: イベント終了後）を追加する。
 */
 
-const Version = "01AL00"
+const Version = "01AL01"
 
 /*
 type Event_Inf struct {

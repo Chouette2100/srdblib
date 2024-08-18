@@ -5,6 +5,7 @@ package srdblib
 
 import (
 	"fmt"
+	"time"
 	"strconv"
 	"strings"
 
@@ -16,6 +17,7 @@ import (
 func GetEventsRankingByApi(
 	client *http.Client, //	HTTPクライアント
 	eid string, //	イベントID
+	mode int, // 1: イベント開催中 2: イベント終了後
 ) (
 	pranking *srapi.Eventranking,
 	err error,
@@ -29,6 +31,12 @@ func GetEventsRankingByApi(
 		return
 	}
 	event := row.(*Event)
+
+	//	mode==1のときイベント終了後ならエラーとする。
+	if mode == 1 && time.Now().After(event.Endtime) {
+		err = fmt.Errorf("%s has ended", event.Eventid)
+		return
+	}
 
 	// イベントに参加しているルームを取得する
 	roomlistinf, err := srapi.GetRoominfFromEventByApi(client, event.Ieventid, 1, 1)
