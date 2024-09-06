@@ -287,7 +287,7 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 	//	ユーザーのランク情報を取得する
 	ria, err := srapi.ApiRoomProfile(client, fmt.Sprintf("%d", userno))
 	if err != nil {
-		err = fmt.Errorf("ApiRoomProfile_All(%d) returned error. %w", userno, err)
+		err = fmt.Errorf("ApiRoomProfile(%d) returned error. %w", userno, err)
 		return err
 	}
 	if ria.Errors != nil {

@@ -30,6 +30,10 @@ func GetEventsRankingByApi(
 		err = fmt.Errorf("Dbmap.Get(): %w", err)
 		return
 	}
+	if row == nil {
+		err = fmt.Errorf("Dbmap.Get(Event{}, eid), %s not found", eid)
+		return
+	}
 	event := row.(*Event)
 
 	//	mode==1のときイベント終了後ならエラーとする。
