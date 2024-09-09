@@ -1,4 +1,5 @@
-/*!
+/*
+!
 Copyright © 2023 chouette.21.00@gmail.com
 Released under the MIT license
 https://opensource.org/licenses/mit-license.php
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/Chouette2100/exsrapi"
-
 )
 
 /*
@@ -31,9 +31,23 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AL01	GetEventsRankingByApi()の引数にmode（1: イベント開催中、2: イベント終了後）を追加する。
 	01AL02	GetEventsRankingByApi()でイベントが存在しない場合のエラー処理を追加する。
 			InsertIntoUser()のコメントを修正する
+	01AM00	ギフトランキング、視聴者ギフトランキングに関する機能を追加する。
+			Giftscore.go, Giftscore_test.go, srdblib.go(変更), Env.yml, Viewer.go
 */
 
-const Version = "01AL02"
+const Version = "01AM02"
+
+type Environment struct {
+	Intervalhour int	`yaml:"Intervalhour"`
+	Lmin         int	`yaml:"Lmin"`
+	Waitmsec     int	`yaml:"Waitmsec"`
+}
+
+var Env Environment = Environment{
+	Intervalhour: 6,     //	6時間以内にデータがあれば重複チェックを行う
+	Lmin:         14400, //	前回更新から10日間以上経っていれば更新する
+	Waitmsec:     100,  //	新しいデータをinsertしてから1秒間待つ
+}
 
 /*
 type Event_Inf struct {
@@ -211,5 +225,3 @@ type PerSlotInf struct {
 }
 
 var Event_inf exsrapi.Event_Inf
-
-

@@ -2,3 +2,4 @@ go.mod
 go.sum
 launch.json
 *.txt
+*_cookies
