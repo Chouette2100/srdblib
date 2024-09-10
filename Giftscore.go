@@ -56,13 +56,13 @@ func InserIntoViewerGiftScore(
 	client *http.Client,
 	dbmap *gorp.DbMap,
 	giftid int,
-	cugr *srapi.CdnUserGiftRanking, idx int,
+	cugr *srapi.UgrRanking,
 	tnow time.Time,
 ) (
 	err error,
 ) {
 
-	intfc, err := Dbmap.Get(Viewer{}, cugr.RankingList[idx].UserID)
+	intfc, err := Dbmap.Get(Viewer{}, cugr.UserID)
 	if err != nil {
 		err = fmt.Errorf("Dbmap.Get error: %v", err)
 		log.Printf("Dbmap.Get error: %v", err)
@@ -72,8 +72,8 @@ func InserIntoViewerGiftScore(
 	if intfc == nil {
 		//	viewerid　が見つからない場合は新たに作成する
 		viewer := &Viewer{
-			Viewerid: cugr.RankingList[idx].UserID,
-			Name:     cugr.RankingList[idx].User.Name,
+			Viewerid: cugr.UserID,
+			Name:     cugr.User.Name,
 			Ts:       tnow,
 		}
 		err = Dbmap.Insert(viewer)
@@ -86,9 +86,9 @@ func InserIntoViewerGiftScore(
 
 	viewerGiftScore := &ViewerGiftScore{
 		Giftid:   giftid,
-		Orderno:  cugr.RankingList[idx].OrderNo,
-		Viewerid: cugr.RankingList[idx].UserID,
-		Score:    cugr.RankingList[idx].Score,
+		Orderno:  cugr.OrderNo,
+		Viewerid: cugr.UserID,
+		Score:    cugr.Score,
 		Status:   "",
 		Ts:       tnow,
 	}
@@ -109,14 +109,14 @@ func InserIntoGiftScore(
 	client *http.Client,
 	dbmap *gorp.DbMap,
 	giftid int,
-	cgr *srapi.CdnGiftRanking, idx int,
+	cgr *srapi.GrRanking,
 	tnow time.Time,
 ) (
 	err error,
 ) {
 
 	user := new(User)
-	user.Userno = cgr.RankingList[idx].RoomID
+	user.Userno = cgr.RoomID
 	err = UpinsUserSetProperty(client, tnow, user, 1440*7, 100)
 	if err != nil {
 		err = fmt.Errorf("UpinsUserSetProperty error: %v", err)
@@ -126,9 +126,9 @@ func InserIntoGiftScore(
 
 	giftScore := &GiftScore{
 		Giftid:  giftid,
-		Userno:  cgr.RankingList[idx].RoomID,
-		Orderno:  cgr.RankingList[idx].OrderNo,
-		Score:  cgr.RankingList[idx].Score,
+		Userno:  cgr.RoomID,
+		Orderno:  cgr.OrderNo,
+		Score:  cgr.Score,
 		Status:  "",
 		Ts:      tnow,
 	}

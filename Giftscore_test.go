@@ -119,7 +119,7 @@ func TestInserIntoGiftScore(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			log.Printf("%+v\n", tt.args)
-			if err := InserIntoGiftScore(tt.args.client, tt.args.dbmap, tt.args.giftid, tt.args.cgr, 0, tt.args.tnow); (err != nil) != tt.wantErr {
+			if err := InserIntoGiftScore(tt.args.client, tt.args.dbmap, tt.args.giftid, &tt.args.cgr.RankingList[0], tt.args.tnow); (err != nil) != tt.wantErr {
 				t.Errorf("InserIntoGiftScore() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -219,7 +219,7 @@ func TestInserIntoViewerGiftScore(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			log.Printf("%+v\n", tt.args)
-			if err := InserIntoViewerGiftScore(tt.args.client, tt.args.dbmap, tt.args.giftid, tt.args.cugr, tt.args.idx, tt.args.tnow); (err != nil) != tt.wantErr {
+			if err := InserIntoViewerGiftScore(tt.args.client, tt.args.dbmap, tt.args.giftid, &tt.args.cugr.RankingList[tt.args.idx], tt.args.tnow); (err != nil) != tt.wantErr {
 				t.Errorf("InserIntoViewerGiftScore() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

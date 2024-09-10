@@ -33,9 +33,10 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 			InsertIntoUser()のコメントを修正する
 	01AM00	ギフトランキング、視聴者ギフトランキングに関する機能を追加する。
 			Giftscore.go, Giftscore_test.go, srdblib.go(変更), Env.yml, Viewer.go
+	01AM01	InsertIntoViewerGiftScore(), InsertIntoGiftScore()の引数を変更する。
 */
 
-const Version = "01AM02"
+const Version = "01AM01"
 
 type Environment struct {
 	Intervalhour int	`yaml:"Intervalhour"`
