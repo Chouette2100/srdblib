@@ -171,6 +171,7 @@ func TestInserIntoViewerGiftScore(t *testing.T) {
 	Dbmap.AddTableWithName(User{}, "user").SetKeys(false, "Userno")
 	Dbmap.AddTableWithName(GiftScore{}, "giftscore").SetKeys(false, "Giftid", "Ts", "Userno")
 	Dbmap.AddTableWithName(Viewer{}, "viewer").SetKeys(false, "Viewerid")
+	Dbmap.AddTableWithName(ViewerHistory{}, "viewerhistory").SetKeys(false, "Viewerid", "Ts")
 	Dbmap.AddTableWithName(ViewerGiftScore{}, "viewergiftscore").SetKeys(false, "Giftid", "Ts", "Viewerid")
 
 	//      cookiejarがセットされたHTTPクライアントを作る

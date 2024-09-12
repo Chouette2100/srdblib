@@ -34,11 +34,13 @@ import (
 type Viewer struct {
   Viewerid int
   Name string
+  Sname string
   Ts time.Time
 }
 
 type ViewerHistory struct{
   Viewerid int
   Name string
+  Sname string
   Ts time.Time
 }

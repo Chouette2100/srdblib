@@ -87,23 +87,21 @@ type Wuser struct {
 	Currentevent string
 }
 
-
-//	userの履歴を保存する構造体
-//	PRIMARY KEY (`userno`,`ts`)
+// userの履歴を保存する構造体
+// PRIMARY KEY (`userno`,`ts`)
 type Userhistory struct {
-	Userno int
+	Userno    int
 	User_name string
-	Genre string
-	Rank string
-	Nrank string
-	Prank string
-	Level int
+	Genre     string
+	Rank      string
+	Nrank     string
+	Prank     string
+	Level     int
 	Followers int
-	Fans int
-	Fans_lst int
-	Ts time.Time
+	Fans      int
+	Fans_lst  int
+	Ts        time.Time
 }
-
 
 // Rank情報からランクのソートキーを作る
 func MakeSortKeyOfRank(rank string, nextscore int) (
@@ -273,7 +271,81 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 	}
 	//	log.Printf("cnt = %d\n", cnt)
 
-	log.Printf("UPDATE userno=%d rank=%s -> %s nscore=%d pscore=%d longname=%s\n", user.Userno, lastrank, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
+	log.Printf("UPDATE(user) userno=%d rank=%s -> %s nscore=%d pscore=%d longname=%s\n", user.Userno, lastrank, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
+
+	//	check userhistory
+	nodata := false
+	uh := Userhistory{}
+	sqlst := "select max(ts) ts from userhistory where userno = ? "
+	err = Dbmap.SelectOne(&uh, sqlst, user.Userno)
+	if err != nil {
+		// log.Printf("<%s>\n", err.Error())
+		if !strings.Contains(err.Error(), "sql: Scan error on column index 0, name \"ts\": unsupported Scan") {
+			//	検索条件に該当するデータが一件もない
+			err = fmt.Errorf("Dbmap.SelectOne error: %v", err)
+			log.Printf("error: %v", err)
+			return err
+		}
+		nodata = true
+	}
+
+	intf := interface{}(nil)
+	if !nodata {
+		intf, err = Dbmap.Get(Userhistory{}, user.Userno, uh.Ts)
+		if err != nil {
+			err = fmt.Errorf("Get(userno=%d) returned error. %w", user.Userno, err)
+			return err
+		}
+	}
+
+	if intf == nil {
+		uh := &Userhistory{
+			Userno:    user.Userno,
+			User_name: user.User_name,
+			Genre:     user.Genre,
+			Rank:      user.Rank,
+			Nrank:     user.Nrank,
+			Prank:     user.Prank,
+			Level:     user.Level,
+			Followers: user.Followers,
+			Fans:      user.Fans,
+			Fans_lst:  user.Fans_lst,
+			Ts:        tnow,
+		}
+
+		err = Dbmap.Insert(uh)
+		if err != nil {
+			err = fmt.Errorf("Insert(userhistory,userno=%d) returned error. %w", uh.Userno, err)
+			return
+		}
+		log.Printf("INSERT(userhistory) userno=%d name =%s genre= %s rank=%s level=%d fikkiwers=%d\n",
+			 uh.Userno, uh.User_name, uh.Genre, uh.Rank, uh.Level, uh.Followers)
+
+	} else {
+		uh := intf.(*Userhistory)
+		if tnow.Sub(uh.Ts) > time.Duration(Env.Lmin) * time.Minute {
+			uh.User_name = user.User_name
+			uh.Genre = user.Genre
+			uh.Rank = user.Rank
+			uh.Nrank = user.Nrank
+			uh.Prank = user.Prank
+			uh.Level = user.Level
+			uh.Followers = user.Followers
+			uh.Fans = user.Fans
+			uh.Fans_lst = user.Fans_lst
+			uh.Ts = tnow
+
+			err = Dbmap.Insert(uh)
+			if err != nil {
+				err = fmt.Errorf("Insert(userhistory, userno=%d) returned error. %w", uh.Userno, err)
+				return
+			}
+			log.Printf("INSERT(userhistory) userno=%d name =%s genre= %s rank=%s level=%d fikkiwers=%d\n",
+			uh.Userno, uh.User_name, uh.Genre, uh.Rank, uh.Level, uh.Followers)
+		}
+
+	}
+
 	return
 }
 
@@ -359,7 +431,34 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 	}
 	//	log.Printf("cnt = %d\n", cnt)
 
-	log.Printf("INSERT userno=%d rank=%s nscore=%d pscore=%d longname=%s\n", user.Userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
+	log.Printf("INSERT(user) userno=%d rank=%s nscore=%d pscore=%d longname=%s\n", user.Userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
+
+	// userhistory
+
+	uh := &Userhistory{
+		Userno:    user.Userno,
+		User_name: user.User_name,
+		Genre:     user.Genre,
+		Rank:      user.Rank,
+		Nrank:     user.Nrank,
+		Prank:     user.Prank,
+		Level:     user.Level,
+		Followers: user.Followers,
+		Fans:      user.Fans,
+		Fans_lst:  user.Fans_lst,
+		Ts:        tnow,
+	}
+
+	//	cnt, err = Dbmap.Update(uh)
+
+	err = Dbmap.Insert(uh)
+	if err != nil {
+		log.Printf("error! %v", err)
+		return
+	}
+
+	log.Printf("INSERT(userhistory) userno=%d rank=%s nscore=%d pscore=%d longname=%s\n", user.Userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
+
 	return
 }
 

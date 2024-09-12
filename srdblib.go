@@ -34,20 +34,21 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AM00	ギフトランキング、視聴者ギフトランキングに関する機能を追加する。
 			Giftscore.go, Giftscore_test.go, srdblib.go(変更), Env.yml, Viewer.go
 	01AM01	InsertIntoViewerGiftScore(), InsertIntoGiftScore()の引数を変更する。
+	01AN01	SRGGR対応
 */
 
-const Version = "01AM01"
+const Version = "01AN01"
 
 type Environment struct {
-	Intervalhour int	`yaml:"Intervalhour"`
-	Lmin         int	`yaml:"Lmin"`
-	Waitmsec     int	`yaml:"Waitmsec"`
+	//	Intervalhour int	`yaml:"Intervalhour"`
+	Lmin     int `yaml:"Lmin"`
+	Waitmsec int `yaml:"Waitmsec"`
 }
 
 var Env Environment = Environment{
-	Intervalhour: 6,     //	6時間以内にデータがあれば重複チェックを行う
-	Lmin:         14400, //	前回更新から10日間以上経っていれば更新する
-	Waitmsec:     100,  //	新しいデータをinsertしてから1秒間待つ
+	//	Intervalhour: 6,     //	6時間以内にデータがあれば重複チェックを行う？
+	Lmin: 14400, //	viewer, user で前回更新から10日間以上経っていれば更新する(UpdateUserSetPropertyのようにこの値を使わない場合もある)
+	Waitmsec: 100, //	viewer, user で新しいデータをinsertしてから1秒間待つ(APIにアクセス制限があるように思えるため)
 }
 
 /*
