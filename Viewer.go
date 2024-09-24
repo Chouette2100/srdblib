@@ -36,6 +36,7 @@ type Viewer struct {
   Name string
   Sname string
   Ts time.Time
+  Orderno int	//	GiftScoreのOrdernoを受けるために追加したメンバー、テーブルには存在しない
 }
 
 type ViewerHistory struct{

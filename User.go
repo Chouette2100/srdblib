@@ -291,6 +291,7 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 
 	intf := interface{}(nil)
 	if !nodata {
+		//	userhisotry にルームのデータが存在するので、そのデータを取得する
 		intf, err = Dbmap.Get(Userhistory{}, user.Userno, uh.Ts)
 		if err != nil {
 			err = fmt.Errorf("Get(userno=%d) returned error. %w", user.Userno, err)
@@ -299,6 +300,7 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 	}
 
 	if intf == nil {
+		//	userhisotryにデータが存在しなかった場合
 		uh := &Userhistory{
 			Userno:    user.Userno,
 			User_name: user.User_name,
@@ -322,8 +324,10 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 			 uh.Userno, uh.User_name, uh.Genre, uh.Rank, uh.Level, uh.Followers)
 
 	} else {
+		//	userhisotryにデータがすでに存在するとき
 		uh := intf.(*Userhistory)
 		if tnow.Sub(uh.Ts) > time.Duration(Env.Lmin) * time.Minute {
+			//	最後のデータから一定時間過ぎているときは新しいデータを挿入する
 			uh.User_name = user.User_name
 			uh.Genre = user.Genre
 			uh.Rank = user.Rank
