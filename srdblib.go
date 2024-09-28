@@ -36,9 +36,10 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AM01	InsertIntoViewerGiftScore(), InsertIntoGiftScore()の引数を変更する。
 	01AN01	SRGGR対応
 	01AN02	campaign.goを作る、Viewer.go,ViewerにOrdernoを追加する、User.go、コメントを追加する。
+	01AN03	campaign.goにUrlを追加する
 */
 
-const Version = "01AN02"
+const Version = "01AN03"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
