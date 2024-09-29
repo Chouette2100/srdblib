@@ -11,7 +11,6 @@ import (
 	//	"os"
 	//	"strconv"
 	//	"strings"
-
 	//	"net/http"
 	//	"github.com/go-gorp/gorp"
 	//      "gopkg.in/gorp.v2"
@@ -31,6 +30,7 @@ import (
 type Campaign struct {
 	Campaignid   string
 	Campaignname string
+	Url          string
 	Startedat    time.Time
 	Endedat      time.Time
 }
