@@ -41,6 +41,7 @@ type GiftRanking struct {
 	Grname     string
 	Grtype     string
 	Norder     int
+	Cntrblst   int
 	Startedat  time.Time
 	Endedat    time.Time
 }
