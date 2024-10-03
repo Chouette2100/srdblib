@@ -39,9 +39,10 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AN03	campaign.goにUrlを追加する
 	01AN04	giftrankingにCntrblsを追加する
 	01AP00	UpinsViewerSetProperty()をあらたに作成する、Giftscore.goにGiftScoreCntrbをあらたに作成する
+	01AP01	UpinsViewerSetProperty()のバグを修正する、ViererのOrdernoを削除する
 */
 
-const Version = "01AP00"
+const Version = "01AP01"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

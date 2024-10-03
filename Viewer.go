@@ -35,7 +35,7 @@ type Viewer struct {
   Name string
   Sname string
   Ts time.Time
-  Orderno int	//	GiftScoreのOrdernoを受けるために追加したメンバー、テーブルには存在しない
+  //	Orderno int	//	GiftScoreのOrdernoを受けるために追加したメンバー、テーブルには存在しない
 }
 
 type ViewerHistory struct{
@@ -52,6 +52,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer,
 	err error,
 ) {
 
+	viewer.Ts = tnow
 	if viewer.Sname == "" {
 		viewer.Sname = viewer.Name
 	}
@@ -84,7 +85,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer,
 		vwh = &ViewerHistory{
 			Viewerid: viewer.Viewerid,
 			Name:     viewer.Name,
-			Sname:    viewer.Name,
+			Sname:    viewer.Sname,
 			Ts:       tnow,
 		}
 		err = Dbmap.Insert(vwh)
@@ -100,7 +101,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer,
 		vw = intfc.(*Viewer)
 
 		nodata := false
-		vh := ViewerHistory{}
+		vh := ViewerHistory{}		//	指定したviewidの最後のデータのTsのみが格納される
 		sqlst := "select max(ts) ts from viewerhistory where viewerid = ? "
 		err = Dbmap.SelectOne(&vh, sqlst, vw.Viewerid)
 		if err != nil {
@@ -121,7 +122,9 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer,
 				log.Printf("error: %v", err)
 				return err
 			}
-			vwh = pintf.(*ViewerHistory)
+			vwh = pintf.(*ViewerHistory) 	// 履歴にある最後のデータの最後（存在すれば）
+		} else {
+			vwh = nil
 		}
 
 		//	if tnow.Sub(pvh.Ts) > 7*24*time.Hour && viewer.Name != cugr.User.Name {
@@ -140,7 +143,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer,
 				return err
 			}
 			log.Printf(" ** INSERT(viewerhistory) viewid=%10d name=%s\n", vwh.Viewerid, vwh.Name)
-		} else if tnow.Sub(vwh.Ts) > time.Duration(lmin)*time.Minute && vh.Name != viewer.Name {
+		} else if tnow.Sub(vwh.Ts) > time.Duration(lmin)*time.Minute && vwh.Name != viewer.Name {
 			vw.Name = viewer.Name
 			vw.Ts = tnow
 			_, err = Dbmap.Update(vw)
@@ -152,9 +155,12 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer,
 			log.Printf(" ** UPDATE(viewer) viewid=%10d name=%s from %s\n", vw.Viewerid, vw.Name, vwh.Name)
 
 			//	vh := intfc.(*ViewerHistory)
+			vwh.Name = viewer.Name
+			vwh.Sname = viewer.Sname
+			vwh.Ts = tnow
 			err = Dbmap.Insert(vwh)
 			if err != nil {
-				err = fmt.Errorf("Dbmap.Insert(vh) error: %v", err)
+				err = fmt.Errorf("Dbmap.Insert(vwh) error: %v", err)
 				log.Printf("error: %v", err)
 				return err
 			}
