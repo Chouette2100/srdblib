@@ -9,7 +9,7 @@ import (
 	"log"
 	//	"os"
 	//	"strconv"
-	"strings"
+	//	"strings"
 	"time"
 
 	"net/http"
@@ -50,8 +50,18 @@ type ViewerGiftScore struct {
 	Ts       time.Time
 }
 
-// ユーザーギフトランキングデータを格納する
-// 必要に応じて視聴者（viewer）の情報を新たに作る、あるいは更新する。
+// ギフト貢献ランキング
+type GiftScoreCntrb struct {
+	Giftid   int
+	Userno   int
+	Viewerid int
+	Orderno  int
+	Score    int
+	Ts       time.Time
+}
+
+// リスナーギフトランキングデータを格納する
+// 必要に応じてリスナー（viewer）の情報を新たに作る、あるいは更新する。
 func InserIntoViewerGiftScore(
 	client *http.Client,
 	dbmap *gorp.DbMap,
@@ -62,115 +72,16 @@ func InserIntoViewerGiftScore(
 	err error,
 ) {
 
-	intfc, err := Dbmap.Get(Viewer{}, cugr.UserID)
+	vw := new(Viewer)
+	vw.Viewerid = cugr.UserID
+	vw.Name = cugr.User.Name
+
+	err = UpinsViewerSetProperty(client, tnow, vw, Env.Lmin)
 	if err != nil {
-		err = fmt.Errorf("Dbmap.Get(Viewer,UserID) error: %v", err)
-		log.Printf("Dbmap.Get error: %v", err)
-		return err
+		err = fmt.Errorf("UpinsViewerSetProperty error: %v", err)
+		return
 	}
 
-	vwh := &ViewerHistory{}
-	vw := &Viewer{}
-	if intfc == nil {
-		//	viewerにviewerid　のデータが見つからない場合は新たに作成する
-		vw = &Viewer{
-			Viewerid: cugr.UserID,
-			Name:     cugr.User.Name,
-			Sname:    cugr.User.Name,
-			Ts:       tnow,
-		}
-		err = Dbmap.Insert(vw)
-		if err != nil {
-			err = fmt.Errorf("Dbmap.Insert error: %v", err)
-			log.Printf("error: %v", err)
-			return err
-		}
-		log.Printf(" ** INSERT(viewer) viewid=%10d name=%s\n", vw.Viewerid, vw.Name)
-
-		//	viewerhistoryにデータを作る
-		vwh = &ViewerHistory{
-			Viewerid: cugr.UserID,
-			Name:     cugr.User.Name,
-			Sname:    cugr.User.Name,
-			Ts:       tnow,
-		}
-		err = Dbmap.Insert(vwh)
-		if err != nil {
-			err = fmt.Errorf("Dbmap.Insert error: %v", err)
-			log.Printf("error: %v", err)
-			return err
-		}
-		log.Printf(" ** INSERT(viewerhistory) viewid=%10d name=%s\n", vwh.Viewerid, vwh.Name)
-
-	} else {
-		//	viewerにvieweridのデータがすでに存在する
-		vw = intfc.(*Viewer)
-
-		nodata := false
-		vh := ViewerHistory{}
-		sqlst := "select max(ts) ts from viewerhistory where viewerid = ? "
-		err = dbmap.SelectOne(&vh, sqlst, vw.Viewerid)
-		if err != nil {
-			//	log.Printf("<%s>\n", err.Error())
-			if !strings.Contains(err.Error(), "sql: Scan error on column index 0, name \"ts\": unsupported Scan") {
-				err = fmt.Errorf("Dbmap.SelectOne error: %v", err)
-				log.Printf("error: %v", err)
-				return err
-			}
-			nodata = true
-		}
-
-		pintf := interface{}(nil)
-		if !nodata {
-			pintf, err = dbmap.Get(ViewerHistory{}, vw.Viewerid, vh.Ts)
-			if err != nil {
-				err = fmt.Errorf("Dbmap.Get error: %v", err)
-				log.Printf("error: %v", err)
-				return err
-			}
-			vwh = pintf.(*ViewerHistory)
-		}
-
-		//	if tnow.Sub(pvh.Ts) > 7*24*time.Hour && viewer.Name != cugr.User.Name {
-		if nodata {
-			//	viewhistoryにデータが存在しない
-			vwh = &ViewerHistory{
-				Viewerid: cugr.UserID,
-				Name:     cugr.User.Name,
-				Sname:    cugr.User.Name,
-				Ts:       tnow,
-			}
-			err = Dbmap.Insert(vwh)
-			if err != nil {
-				err = fmt.Errorf("Dbmap.Insert error: %v", err)
-				log.Printf("error: %v", err)
-				return err
-			}
-			log.Printf(" ** INSERT(viewerhistory) viewid=%10d name=%s\n", vwh.Viewerid, vwh.Name)
-		} else if tnow.Sub(vwh.Ts) > time.Duration(Env.Lmin) * time.Minute && vh.Name != cugr.User.Name {
-			vw.Name = cugr.User.Name
-			vw.Ts = tnow
-			_, err = Dbmap.Update(vw)
-			if err != nil {
-				err = fmt.Errorf("Dbmap.Update error: %v", err)
-				log.Printf("error: %v", err)
-				return err
-			}
-			log.Printf(" ** UPDATE(viewer) viewid=%10d name=%s from %s\n", vw.Viewerid, vw.Name, vwh.Name)
-
-			//	vh := intfc.(*ViewerHistory)
-			err = Dbmap.Insert(vwh)
-			if err != nil {
-				err = fmt.Errorf("Dbmap.Insert(vh) error: %v", err)
-				log.Printf("error: %v", err)
-				return err
-			}
-			log.Printf("    INSERT(viewerhistory) viewid=%10d name=%s from k\n", vh.Viewerid, vh.Name)
-
-		} else {
-			log.Printf(" ** SKIP(viewer/viewerhistory)   viewid=%10d name=%s\n", vw.Viewerid, vw.Name)
-		}
-	}
 
 	//	ユーザーギフトランキングを格納する
 	vgs := &ViewerGiftScore{
@@ -208,7 +119,7 @@ func InserIntoGiftScore(
 	user := new(User)
 	user.Userno = cgr.RoomID
 	//	err = UpinsUserSetProperty(client, tnow, user, 1440*7, 100)
-	err = UpinsUserSetProperty(client, tnow, user, Env.Lmin, Env.Waitmsec )
+	err = UpinsUserSetProperty(client, tnow, user, Env.Lmin, Env.Waitmsec)
 	if err != nil {
 		err = fmt.Errorf("UpinsUserSetProperty error: %v", err)
 		log.Printf("UpinsUserSetProperty error: %v", err)
@@ -231,3 +142,49 @@ func InserIntoGiftScore(
 	log.Printf("    INSERT(GiftScore) userno=%10d\n", cgr.RoomID)
 	return
 }
+
+
+// ギフトランキング・リスナー貢献ランキングデータを格納する
+// 必要に応じてリスナー（viewer）の情報を新たに作る、あるいは更新する。
+func InserIntoGiftScoreCntrb(
+	client *http.Client,
+	dbmap *gorp.DbMap,
+	giftid int,
+	userno int,
+	grc *srapi.GrcRanking,
+	tnow time.Time,
+) (
+	err error,
+) {
+
+	vw := new(Viewer)
+	vw.Viewerid = grc.UserID
+	vw.Name = grc.User.Name
+
+	err = UpinsViewerSetProperty(client, tnow, vw, Env.Lmin)
+	if err != nil {
+		err = fmt.Errorf("UpinsViewerSetProperty error: %v", err)
+		return
+	}
+
+
+	//	ユーザーギフトランキングを格納する
+	vgs := &GiftScoreCntrb{
+		Giftid:   giftid,
+		Orderno:  grc.OrderNo,
+		Viewerid: grc.UserID,
+		Score:    grc.Score,
+		Ts:       tnow,
+	}
+
+	err = Dbmap.Insert(vgs)
+	if err != nil {
+		err = fmt.Errorf("ViewrGiftScore error: %v", err)
+		log.Printf("error: %v", err)
+		//	return err
+	}
+	log.Printf("    INSERT(GiftScoreCntrb) viewid=%10d name=%s score=%d\n", vgs.Viewerid, vw.Name, vgs.Score)
+
+	return
+}
+
