@@ -170,6 +170,7 @@ func InserIntoGiftScoreCntrb(
 
 	//	ユーザーギフトランキングを格納する
 	vgs := &GiftScoreCntrb{
+		Userno:   userno,
 		Giftid:   giftid,
 		Orderno:  grc.OrderNo,
 		Viewerid: grc.UserID,
