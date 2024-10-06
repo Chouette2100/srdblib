@@ -41,9 +41,10 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AP00	UpinsViewerSetProperty()をあらたに作成する、Giftscore.goにGiftScoreCntrbをあらたに作成する
 	01AP01	UpinsViewerSetProperty()のバグを修正する、ViererのOrdernoを削除する
 	01AP02	giftscorecntrbへのinsertでのusernoの抜けを修正する
+	01AP03	UpdateUserSetProperty()でデータの取得に失敗したときは処理を打ち切る、そうしないとデータがクリアされてしまう
 */
 
-const Version = "01AP02"
+const Version = "01AP03"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

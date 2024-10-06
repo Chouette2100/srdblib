@@ -203,11 +203,12 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 		return err
 	}
 	if ria.Errors != nil {
-		//	err = fmt.Errorf("ApiRoomProfile_All(%d) returned error. %v", userno, ria.Errors)
-		//	return err
-		ria.ShowRankSubdivided = "unknown"
-		ria.NextScore = 0
-		ria.PrevScore = 0
+		//	ここで処理を継続するようになっていたが、データがクリアされてしまうので処理を終了する（2024-10-06）
+		err = fmt.Errorf("ApiRoomProfile_All(%d) returned error. %v", user.Userno, ria.Errors)
+		return err
+		//	ria.ShowRankSubdivided = "unknown"
+		//	ria.NextScore = 0
+		//	ria.PrevScore = 0
 	}
 
 	if ria.ShowRankSubdivided == "" {
@@ -367,6 +368,7 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 		return err
 	}
 	if ria.Errors != nil {
+		//	データを取得できない場合処理を終了してしまうとuserからデータを取得できなくなってしまうので仮のデータを格納する。
 		//	err = fmt.Errorf("ApiRoomProfile_All(%d) returned error. %v", userno, ria.Errors)
 		//	return err
 		ria.ShowRankSubdivided = "unknown"
