@@ -43,11 +43,19 @@ func GetEventsRankingByApi(
 	}
 
 	// イベントに参加しているルームを取得する
+	//	ApiEventsRanking()にはイベントにエントリーしているルームのルームIDとが一つ必要だから
+	//	REVIEW:  ブロックイベントの場合はこのルームがランキングを取得するブロックが違う可能性がある。この方法でいいのか？
 	roomlistinf, err := srapi.GetRoominfFromEventByApi(client, event.Ieventid, 1, 1)
 	if err != nil {
 		err = fmt.Errorf("GetRoominfFromEventByApi(): %w", err)
 		return
 	}
+	if len(roomlistinf.RoomList) == 0 {
+		//  エントリーしているルームが一つもない。
+		err = fmt.Errorf("GetRoominfFromEventByApi(): %s has no room", event.Eventid)
+		return
+	}
+
 	roomid := roomlistinf.RoomList[0].Room_id
 
 	// イベント結果を取得する
