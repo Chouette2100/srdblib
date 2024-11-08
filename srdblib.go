@@ -43,9 +43,10 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AP02	giftscorecntrbへのinsertでのusernoの抜けを修正する
 	01AP03	UpdateUserSetProperty()でデータの取得に失敗したときは処理を打ち切る、そうしないとデータがクリアされてしまう
 	01AQ00	UpinsEventuser() 新規作成（≒ InsertNewOnes.go() ）、GetEventsRankingByApi.go() でイベントが存在しない場合の処理を追加する
+	01AR00	UpinsEventuser() 引数にcmapを追加する（Event_infを使わないようにするため）
 */
 
-const Version = "01AQ00"
+const Version = "01AR00"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
@@ -142,6 +143,44 @@ var Colorlist1 []Color = []Color{
 	{"darkorange", "darkorange"},
 	{"skyblue", "skyblue"},
 	{"lightpink", "lightpink"},
+}
+
+var Colorlist0 []Color = []Color{
+			{"#00FFFF", "#00FFFF"},
+			{"#FF00FF", "#FF00FF"},
+			{"#FFFF00", "#FFFF00"},
+			//      -----
+			{"#7F7FFF", "#7F7FFF"},
+			{"#FF7F7F", "#FF7F7F"},
+			{"#7FFF7F", "#7FFF7F"},
+
+			{"#7FBFFF", "#7FBFFF"},
+			{"#FF7FBF", "#FF7FBF"},
+			{"#BFFF7F", "#BFFF7F"},
+
+			{"#7FFFFF", "#7FFFFF"},
+			{"#FF7FFF", "#FF7FFF"},
+			{"#FFFF7F", "#FFFF7F"},
+
+			{"#7FFFBF", "#7FFFBF"},
+			{"#BF7FFF", "#BF7FFF"},
+			{"#FFBF7F", "#FFBF7F"},
+			//      -----
+			{"#ADADFF", "#ADADFF"},
+			{"#FFADAD", "#FFADAD"},
+			{"#ADFFAD", "#7FFFAD"},
+
+			{"#ADD6FF", "#ADD6FF"},
+			{"#FFADD6", "#FFADD6"},
+			{"#D6FFAD", "#D6FFAD"},
+
+			{"#ADFFFF", "#ADFFFF"},
+			{"#FFADFF", "#FFADFF"},
+			{"#FFFFAD", "#FFFFAD"},
+
+			{"#ADFFD6", "#ADFFD6"},
+			{"#D6ADFF", "#D6ADFF"},
+			{"#FFD6AD", "#FFD6AD"},
 }
 
 type ColorInf struct {

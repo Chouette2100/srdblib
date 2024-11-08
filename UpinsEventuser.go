@@ -15,22 +15,24 @@ import (
 
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-
 	//	"github.com/Chouette2100/exsrapi"
 	//	"github.com/Chouette2100/srapi"
 )
-//	イベントに新しいユーザを追加する
-//		InserNewOnes()をコピーし引数を変更したもの
-//			TODO: こちらに統一すること
-//		eventuser	新規作成または更新
-//		user 新規作成または更新
-//		points イベント開始時のデータを新規作成
+
+// イベントに新しいユーザを追加する
+//
+//	InserNewOnes()をコピーし引数を変更したもの
+//		TODO: こちらに統一すること
+//	eventuser	新規作成または更新
+//	user 新規作成または更新
+//	points イベント開始時のデータを新規作成
 func UpinsEventuser(
 	client *http.Client,
 	order int,
 	point int,
 	eventid string,
 	starttime time.Time,
+	cmap int,
 	userno int,
 	tnow time.Time,
 ) (
@@ -55,9 +57,11 @@ func UpinsEventuser(
 		return
 	}
 
-	Colorlist := Colorlist2
-	if Event_inf.Cmap == 1 {
-		Colorlist = Colorlist1
+	colorlist := Colorlist2
+	if cmap == 1 {
+		colorlist = Colorlist1
+	} else if cmap == 0{
+		colorlist = Colorlist0
 	}
 
 	if nrow == 0 {
@@ -72,13 +76,20 @@ func UpinsEventuser(
 		}
 		defer stmt.Close()
 
+		cidx := 0
+		if order > 0 {
+			cidx = (order-1) % len(colorlist)
+		} else {
+			cidx = (order + 10000) % len(colorlist)
+		}
+
 		//	if i < 10 {
 		_, Dberr = stmt.Exec(
 			eventid,
 			userno,
 			"Y",
 			"Y",
-			Colorlist[order%len(Colorlist)].Name,
+			colorlist[cidx].Name,
 			"N",
 			point,
 		)
@@ -161,14 +172,14 @@ func UpinsEventuser(
 			log.Printf("   **** user already exists.\n")
 
 			/*
-			puser := row.(*User)
-			err = UpdateUserSetProperty(client, tnow, puser)
-			if err != nil {
-				err = fmt.Errorf("UpdateUserSetProperty(client, tnow, puser): %w", err)
-				return
-			}
+				puser := row.(*User)
+				err = UpdateUserSetProperty(client, tnow, puser)
+				if err != nil {
+					err = fmt.Errorf("UpdateUserSetProperty(client, tnow, puser): %w", err)
+					return
+				}
 
-			log.Printf("   **** update user.\n")
+				log.Printf("   **** update user.\n")
 			*/
 		}
 
