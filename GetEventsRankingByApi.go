@@ -1,17 +1,18 @@
-//	Copyright © 2024 chouette.21.00@gmail.com
-//	Released under the MIT license
-//	https://opensource.org/licenses/mit-license.php
+// Copyright © 2024 chouette.21.00@gmail.com
+// Released under the MIT license
+// https://opensource.org/licenses/mit-license.php
 package srdblib
 
 import (
 	"fmt"
-	"time"
 	"strconv"
 	"strings"
+	"time"
 
 	"net/http"
 
 	"github.com/Chouette2100/srapi"
+	//	"github.com/Chouette2100/srdblib"
 )
 
 func GetEventsRankingByApi(
@@ -37,8 +38,20 @@ func GetEventsRankingByApi(
 	event := row.(*Event)
 
 	//	mode==1のときイベント終了後ならエラーとする。
-	if mode == 1 && time.Now().After(event.Endtime) {
-		err = fmt.Errorf("%s has ended", event.Eventid)
+	if mode == 1 && time.Now().After(event.Endtime.Add(1 * time.Minute)) {
+		//	err = fmt.Errorf("%s has ended", event.Eventid)
+		pranking = &srapi.Eventranking{}
+		r := make( []struct {
+                Point int `json:"point"`
+                Room  struct {
+                        Name        string `json:"name"`
+                        ImageSquare string `json:"image_square"`
+                        RoomID      int    `json:"room_id"`
+                        Image       string `json:"image"`
+                } `json:"room"`
+                Rank int `json:"rank"`
+        },0)
+		pranking.Ranking = r
 		return
 	}
 

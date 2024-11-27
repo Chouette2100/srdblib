@@ -20,7 +20,7 @@ func SelectFromEvent(
 	peventinf = &eventinf
 
 	sql := "select eventid,ieventid,event_name, period, starttime, endtime, noentry, intervalmin, modmin, modsec, "
-	sql += " Fromorder, Toorder, Resethh, Resetmm, Nobasis, Maxdsp, cmap, target, `rstatus`, maxpoint "
+	sql += " Fromorder, Toorder, Resethh, Resetmm, Nobasis, Maxdsp, cmap, target, `rstatus`, maxpoint, thinit, thdelta "
 	sql += " from " + tevent + " where eventid = ?"
 	Dberr = Db.QueryRow(sql, eventid).Scan(
 		&eventinf.Event_ID,
@@ -43,6 +43,8 @@ func SelectFromEvent(
 		&eventinf.Target,
 		&eventinf.Rstatus,
 		&eventinf.Maxpoint,
+		&eventinf.Thinit,
+		&eventinf.Thdelta,
 	)
 
 	if Dberr != nil {
