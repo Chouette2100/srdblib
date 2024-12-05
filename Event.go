@@ -40,6 +40,8 @@ type Event struct {
 	Aclr        int
 }
 
+type Wevent Event
+
 //	event := Event{
 //		Intervalmin: 5,
 //		Modmin:      4,
@@ -66,6 +68,8 @@ type Eventuser struct {
 	Vld           int
 	Status        int //	1: ユーザーによって指定された＝無条件にデータ取得対象とする
 }
+
+type Weventuser Eventuser
 
 //	eventuser := Eventuser{
 //		vld: 1,

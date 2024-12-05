@@ -19,6 +19,7 @@ func TestGetFeaturedEvents(t *testing.T) {
 	type args struct {
 		hours int
 		num   int
+		lmct  int
 	}
 	tests := []struct {
 		name       string
@@ -29,7 +30,8 @@ func TestGetFeaturedEvents(t *testing.T) {
 			name: "SelectFromEvent_test",
 			args: args{
 				hours: 24,
-				num: 20,
+				num:   18,
+				lmct:  10,
 			},
 			wantEvents: map[string]bool{
 				"SelectFromEvent_test": true,
@@ -63,7 +65,7 @@ func TestGetFeaturedEvents(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotEvents := GetFeaturedEvents(tt.args.hours, tt.args.num); !reflect.DeepEqual(gotEvents, tt.wantEvents) {
+			if gotEvents := GetFeaturedEvents(tt.args.hours, tt.args.num, tt.args.lmct); !reflect.DeepEqual(gotEvents, tt.wantEvents) {
 				t.Errorf("GetFeaturedEvents() = %v, want %v", gotEvents, tt.wantEvents)
 			} else {
 				t.Logf("GetFeaturedEvents() = %v, want %v", gotEvents, tt.wantEvents)

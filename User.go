@@ -66,6 +66,9 @@ type User struct {
 	Currentevent string
 }
 
+type Wuser User
+
+/*
 type Wuser struct {
 	Userno       int
 	Userid       string
@@ -86,6 +89,7 @@ type Wuser struct {
 	Color        string
 	Currentevent string
 }
+*/
 
 // userの履歴を保存する構造体
 // PRIMARY KEY (`userno`,`ts`)
@@ -102,6 +106,8 @@ type Userhistory struct {
 	Fans_lst  int
 	Ts        time.Time
 }
+
+type Wuserhistory Userhistory
 
 // Rank情報からランクのソートキーを作る
 func MakeSortKeyOfRank(rank string, nextscore int) (
@@ -322,12 +328,12 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 			return
 		}
 		log.Printf("INSERT(userhistory) userno=%d name =%s genre= %s rank=%s level=%d fikkiwers=%d\n",
-			 uh.Userno, uh.User_name, uh.Genre, uh.Rank, uh.Level, uh.Followers)
+			uh.Userno, uh.User_name, uh.Genre, uh.Rank, uh.Level, uh.Followers)
 
 	} else {
 		//	userhisotryにデータがすでに存在するとき
 		uh := intf.(*Userhistory)
-		if tnow.Sub(uh.Ts) > time.Duration(Env.Lmin) * time.Minute {
+		if tnow.Sub(uh.Ts) > time.Duration(Env.Lmin)*time.Minute {
 			//	最後のデータから一定時間過ぎているときは新しいデータを挿入する
 			uh.User_name = user.User_name
 			uh.Genre = user.Genre
@@ -346,7 +352,7 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 				return
 			}
 			log.Printf("INSERT(userhistory) userno=%d name =%s genre= %s rank=%s level=%d fikkiwers=%d\n",
-			uh.Userno, uh.User_name, uh.Genre, uh.Rank, uh.Level, uh.Followers)
+				uh.Userno, uh.User_name, uh.Genre, uh.Rank, uh.Level, uh.Followers)
 		}
 
 	}

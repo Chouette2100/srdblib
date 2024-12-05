@@ -45,9 +45,11 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AQ00	UpinsEventuser() 新規作成（≒ InsertNewOnes.go() ）、GetEventsRankingByApi.go() でイベントが存在しない場合の処理を追加する
 	01AR00	UpinsEventuser() 引数にcmapを追加する（Event_infを使わないようにするため）
 	01AS00	eventにthinit、thdeltaを追加する。Accesslog.goを追加する。
+	01AS01	srdblib.GetFeaturedEvents()のインターフェース仕様を変更する。
+	01AT00	Wuser, Wuserhitory, Wevent, Weventuser を User, Userhistory, Event, Eventserから定義する。
 */
 
-const Version = "01AS00"
+const Version = "01AT00"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
