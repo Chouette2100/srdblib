@@ -31,7 +31,7 @@ func GetFeaturedEvents(
 
 	eventmap = make(map[string]int)
 
-	sqlst := "select eventid, count(*) ct from accesslog where ts > SUBDATE(now(),INTERVAL ? hour) "
+	sqlst := "select eventid, count(*) ct from accesslog where ts > SUBDATE(now(),INTERVAL ? hour) AND is_bot = 0 "
 	sqlst += " group by eventid order by ct desc limit ? "
 
 	type event struct {

@@ -47,9 +47,10 @@ Ver.00AA00	srdblibを導入する（データベースアクセスを一本化�
 	01AS00	eventにthinit、thdeltaを追加する。Accesslog.goを追加する。
 	01AS01	srdblib.GetFeaturedEvents()のインターフェース仕様を変更する。
 	01AT00	Wuser, Wuserhitory, Wevent, Weventuser を User, Userhistory, Event, Eventserから定義する。
+	01AT01	GetFeaturedEvents()でis_bot==1のデータを除外する。
 */
 
-const Version = "01AT00"
+const Version = "01AT01"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
