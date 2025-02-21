@@ -17,15 +17,6 @@ func TestUpinsEventuser(t *testing.T) {
 		tnow time.Time
 		weu  Weventuser
 	}
-	tw := Weventuser{
-		EventuserBR: EventuserBR{
-			Eventid: "mattari_fireworks215",
-			Userno:  455133,
-			Vld:     1,
-			Point:   40000,
-		},
-		Status: 1,
-	}
 
 	tests := []struct {
 		name    string
@@ -36,7 +27,15 @@ func TestUpinsEventuser(t *testing.T) {
 		{
 			name: "TestOfUpinsEventuser",
 			args: args{
-				weu:  tw,
+				weu: Weventuser{
+					EventuserBR: EventuserBR{
+						Eventid: "mattari_fireworks215",
+						Userno:  455133,
+						Vld:     1,
+						Point:   50000,
+					},
+					Status: 0,
+				},
 				tnow: time.Now().Truncate(time.Second),
 			},
 			wantErr: false,
@@ -70,7 +69,7 @@ func TestUpinsEventuser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := UpinsEventuserG(&tw, tt.args.tnow); (err != nil) != tt.wantErr {
+			if err := UpinsEventuserG(&tt.args.weu, tt.args.tnow); (err != nil) != tt.wantErr {
 				t.Errorf("UpinsEventuser() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

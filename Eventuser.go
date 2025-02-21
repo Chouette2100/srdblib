@@ -18,11 +18,12 @@ import (
 type EventuserR interface {
 	Get() (*Eventuser, error)
 	Set(*Eventuser) error
+	// Print()
 	/*
-	SelectEudata() (*Eventuser, error)
-	InsertEutable() error
-	UpdateEutable() error
-	UpinsEventuser(time.Time) error
+		SelectEudata() (*Eventuser, error)
+		InsertEutable() error
+		UpdateEutable() error
+		UpinsEventuser(time.Time) error
 	*/
 }
 
@@ -84,6 +85,14 @@ func (e *Weventuser) Set(ne *Eventuser) (err error) {
 	return
 }
 
+// func (e Eventuser) Print() {
+// 	fmt.Printf("Eventuser: %v\n", e)
+// }
+
+// func (e Weventuser) Print() {
+// 	fmt.Printf("Wventuser: %+v\n", e)
+// }
+
 func SelectEudata[T EventuserR](xeu T, eventid string, userno int) (
 	result *T,
 	err error,
@@ -99,9 +108,9 @@ func SelectEudata[T EventuserR](xeu T, eventid string, userno int) (
 		result = nil
 		return
 	} else {
-		fmt.Printf("intf type: %T\n", intf)
+		// fmt.Printf("intf type: %T\n", intf)
 		p := intf.(T)
-		fmt.Printf("intf type: %T\n", intf)
+		// fmt.Printf("intf type: %T\n", intf)
 		result = &p
 	}
 	return
@@ -113,7 +122,7 @@ func UpdateEutable[T EventuserR](xeu T) (err error) {
 	nr, err = Dbmap.Update(xeu)
 	if err != nil {
 		err = fmt.Errorf("Dbmap.Update failed: %w", err)
-	} else if nr == 0 {
+	} else if nr != 1 {
 		err = fmt.Errorf("Dbmap.Update failed: nr = %d", nr)
 	}
 	return
@@ -135,6 +144,7 @@ func UpinsEventuserG[T EventuserR](xeu T, tnow time.Time) (err error) {
 		err = fmt.Errorf("xeu.Get failed: %w", err)
 		return
 	}
+	// xeu.Print()
 	eventid := teu.Eventid
 	userno := teu.Userno
 	cxeu, err = SelectEudata(xeu, eventid, userno)
@@ -170,14 +180,33 @@ func UpinsEventuserG[T EventuserR](xeu T, tnow time.Time) (err error) {
 			return
 		}
 
-		if teu.Vld > 0 {
-			ceu.Vld = teu.Vld
+		if teu.Vld == 0 {
+			teu.Vld = ceu.Vld
 		}
-		if teu.Point > ceu.Point {
-			ceu.Point = teu.Point
+		if teu.Point < ceu.Point {
+			teu.Point = ceu.Point
 		}
-		ceu.Color = Colorlist2[(ceu.Vld-1)%len(Colorlist2)].Name
+		if teu.Vld < 21 {
+			teu.Graph = "Y"
+		} else {
+			teu.Graph = "N"
+		}
+
+		teu.Color = Colorlist2[(teu.Vld-1)%len(Colorlist2)].Name
+
+		teu.Istarget = ceu.Istarget
+		teu.Iscntrbpoints = ceu.Iscntrbpoints
+
 		// TODO: Vldがマイナスのときの処理を追加（あるいはレベルイベントのときの処理を追加）
+
+		if *ceu == *teu {
+			log.Printf("No change: %s %d\n", teu.Eventid, teu.Userno)
+			return
+		} // else {
+		// 	log.Printf("Change: %s %d\n", teu.Eventid, teu.Userno)
+		// 	log.Printf("Before: %v\n", ceu)
+		// 	log.Printf("After: %v\n", teu)
+		// }
 
 		xeu.Set(ceu)
 		err = UpdateEutable(xeu)

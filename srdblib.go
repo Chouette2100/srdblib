@@ -13,42 +13,44 @@ import (
 )
 
 /*
-Ver.00AA00	srdblibを導入する（データベースアクセスを一本化する）
+00AA00	srdblibを導入する（データベースアクセスを一本化する）
 		Event_InfにAchkを追加する（wevent用）
-	01AA00	SSHConfigをDBConfigに統合し、DBConfigのファイル読み込みもこの関数内で行う
-	01AB00	CGIでイベントリストを操作の基本にすることとSRGCEの機能強化に関わる変更
-	01AC00	操作対象のテーブルをsrdblib.Teventで指定する方法から関数の引数とする方法に変える
-	01AD00	gorpを導入(OpenDB.go)し、User.goとPoints.goを追加する。
-	01AD00a	InsertNewOnes.go にコメントを追加する。
-	01AE00	user.goにUpinsUserSetPoperty()を追加する。
-	01AF00	InsertNewOnes()にgorpを適用する。
-	01AG00	InsertNewOnes()でuserのUPDATEは行わない（userのUPDATEは定期的に行う）
-	01AG01	UpinsUserSetProperty()でウェイトができるようにする（srapi.ApiRoomProfileAll()の実行頻度に制限がある模様）
-	01AH00	srapi.ApiRoomProfileAll()の関数名をsrapi.ApiRoomProfile()としたことに対応する。
-	01AJ00	Event.goを追加する。User.goにwuserと関連関数を追加する。
-	01AK00	Timetable.goを追加する。
-	01AL00	GetEventsRankingByApi.goを追加する。
-	01AL01	GetEventsRankingByApi()の引数にmode（1: イベント開催中、2: イベント終了後）を追加する。
-	01AL02	GetEventsRankingByApi()でイベントが存在しない場合のエラー処理を追加する。
-			InsertIntoUser()のコメントを修正する
-	01AM00	ギフトランキング、視聴者ギフトランキングに関する機能を追加する。
-			Giftscore.go, Giftscore_test.go, srdblib.go(変更), Env.yml, Viewer.go
-	01AM01	InsertIntoViewerGiftScore(), InsertIntoGiftScore()の引数を変更する。
-	01AN01	SRGGR対応
-	01AN02	campaign.goを作る、Viewer.go,ViewerにOrdernoを追加する、User.go、コメントを追加する。
-	01AN03	campaign.goにUrlを追加する
-	01AN04	giftrankingにCntrblsを追加する
-	01AP00	UpinsViewerSetProperty()をあらたに作成する、Giftscore.goにGiftScoreCntrbをあらたに作成する
-	01AP01	UpinsViewerSetProperty()のバグを修正する、ViererのOrdernoを削除する
-	01AP02	giftscorecntrbへのinsertでのusernoの抜けを修正する
-	01AP03	UpdateUserSetProperty()でデータの取得に失敗したときは処理を打ち切る、そうしないとデータがクリアされてしまう
-	01AQ00	UpinsEventuser() 新規作成（≒ InsertNewOnes.go() ）、GetEventsRankingByApi.go() でイベントが存在しない場合の処理を追加する
-	01AR00	UpinsEventuser() 引数にcmapを追加する（Event_infを使わないようにするため）
-	01AS00	eventにthinit、thdeltaを追加する。Accesslog.goを追加する。
-	01AS01	srdblib.GetFeaturedEvents()のインターフェース仕様を変更する。
-	01AT00	Wuser, Wuserhitory, Wevent, Weventuser を User, Userhistory, Event, Eventserから定義する。
-	01AT01	GetFeaturedEvents()でis_bot==1のデータを除外する。
-	01AU00	UpinsEventuser()をジェネリックで実装したUpdateEutableG()を作成する。
+01AA00	SSHConfigをDBConfigに統合し、DBConfigのファイル読み込みもこの関数内で行う
+01AB00	CGIでイベントリストを操作の基本にすることとSRGCEの機能強化に関わる変更
+01AC00	操作対象のテーブルをsrdblib.Teventで指定する方法から関数の引数とする方法に変える
+01AD00	gorpを導入(OpenDB.go)し、User.goとPoints.goを追加する。
+01AD00a	InsertNewOnes.go にコメントを追加する。
+01AE00	user.goにUpinsUserSetPoperty()を追加する。
+01AF00	InsertNewOnes()にgorpを適用する。
+01AG00	InsertNewOnes()でuserのUPDATEは行わない（userのUPDATEは定期的に行う）
+01AG01	UpinsUserSetProperty()でウェイトができるようにする（srapi.ApiRoomProfileAll()の実行頻度に制限がある模様）
+01AH00	srapi.ApiRoomProfileAll()の関数名をsrapi.ApiRoomProfile()としたことに対応する。
+01AJ00	Event.goを追加する。User.goにwuserと関連関数を追加する。
+01AK00	Timetable.goを追加する。
+01AL00	GetEventsRankingByApi.goを追加する。
+01AL01	GetEventsRankingByApi()の引数にmode（1: イベント開催中、2: イベント終了後）を追加する。
+01AL02	GetEventsRankingByApi()でイベントが存在しない場合のエラー処理を追加する。
+		InsertIntoUser()のコメントを修正する
+01AM00	ギフトランキング、視聴者ギフトランキングに関する機能を追加する。
+		Giftscore.go, Giftscore_test.go, srdblib.go(変更), Env.yml, Viewer.go
+01AM01	InsertIntoViewerGiftScore(), InsertIntoGiftScore()の引数を変更する。
+01AN01	SRGGR対応
+01AN02	campaign.goを作る、Viewer.go,ViewerにOrdernoを追加する、User.go、コメントを追加する。
+01AN03	campaign.goにUrlを追加する
+01AN04	giftrankingにCntrblsを追加する
+01AP00	UpinsViewerSetProperty()をあらたに作成する、Giftscore.goにGiftScoreCntrbをあらたに作成する
+01AP01	UpinsViewerSetProperty()のバグを修正する、ViererのOrdernoを削除する
+01AP02	giftscorecntrbへのinsertでのusernoの抜けを修正する
+01AP03	UpdateUserSetProperty()でデータの取得に失敗したときは処理を打ち切る、そうしないとデータがクリアされてしまう
+01AQ00	UpinsEventuser() 新規作成（≒ InsertNewOnes.go() ）、GetEventsRankingByApi.go() でイベントが存在しない場合の処理を追加する
+01AR00	UpinsEventuser() 引数にcmapを追加する（Event_infを使わないようにするため）
+01AS00	eventにthinit、thdeltaを追加する。Accesslog.goを追加する。
+01AS01	srdblib.GetFeaturedEvents()のインターフェース仕様を変更する。
+01AT00	Wuser, Wuserhitory, Wevent, Weventuser を User, Userhistory, Event, Eventserから定義する。
+01AT01	GetFeaturedEvents()でis_bot==1のデータを除外する。
+01AU00	UpinsEventuser()をジェネリックで実装したUpdateEutableG()を作成する。
+01AU01	UpinsEventuserG()で同じデータでの更新を行わないようにする。
+		ポインターレシーバでないものが混在するときの処理を確認する（Print()、確認の上、コメントアウトする）
 */
 
 const Version = "01AU00"
