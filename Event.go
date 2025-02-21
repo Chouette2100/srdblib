@@ -55,22 +55,3 @@ type Wevent Event
 //		Cmap:        1,
 //	}
 
-//		イベントに参加しているユーザの構造体
-//	 PRIMARY KEY (`eventid`,`userno`)
-type Eventuser struct {
-	Eventid       string
-	Userno        int
-	Istarget      string
-	Iscntrbpoints string
-	Graph         string
-	Color         string
-	Point         int
-	Vld           int
-	Status        int //	1: ユーザーによって指定された＝無条件にデータ取得対象とする
-}
-
-type Weventuser Eventuser
-
-//	eventuser := Eventuser{
-//		vld: 1,
-//	}
