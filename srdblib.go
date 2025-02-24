@@ -51,10 +51,11 @@ import (
 01AU00	UpinsEventuser()をジェネリックで実装したUpdateEutableG()を作成する。
 01AU01	UpinsEventuserG()で同じデータでの更新を行わないようにする。
 		ポインターレシーバでないものが混在するときの処理を確認する（Print()、確認の上、コメントアウトする）
-01AV00  UpinsUserG.goを新たに作成する。
+01AV00	UpinsUserG.goを新たに作成する。
+01AV01	UpinsUserSetProperty()で最近のデータで更新が必要なくなった場合はウェイトしないようにする。
 */
 
-const Version = "01AV00"
+const Version = "01AV01"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

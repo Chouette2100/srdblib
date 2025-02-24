@@ -174,6 +174,7 @@ func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User, lmin 
 			if err != nil {
 				err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", user.Userno, err)
 			}
+			time.Sleep(time.Duration(wait) * time.Millisecond)
 		} else {
 			usert := row.(*User)
 			//	lastrank := usert.Rank
@@ -185,9 +186,9 @@ func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User, lmin 
 			if err != nil {
 				err = fmt.Errorf("UpdateUserSetProperty(userno=%d) returned error. %w", user.Userno, err)
 			}
+			time.Sleep(time.Duration(wait) * time.Millisecond)
 			//	log.Printf("UpinsUserSetProperty(userno=%d %s) lastrank=%s -> %s", user.Userno, usert.User_name, lastrank, usert.Rank)
 		}
-		time.Sleep(time.Duration(wait) * time.Millisecond)
 	}
 
 	return
