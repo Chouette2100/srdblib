@@ -7,23 +7,23 @@ https://opensource.org/licenses/mit-license.php
 package srdblib
 
 import (
-	"fmt"
+	// "fmt"
 	//	"io"
-	"log"
+	// "log"
 	//	"os"
-	"strconv"
-	"strings"
+	// "strconv"
+	// "strings"
 	"time"
 
-	"net/http"
+	// "net/http"
 
 	//	"github.com/go-gorp/gorp"
 	//      "gopkg.in/gorp.v2"
 
-	"github.com/dustin/go-humanize"
+	// "github.com/dustin/go-humanize"
 
 	//	"github.com/Chouette2100/exsrapi"
-	"github.com/Chouette2100/srapi"
+	// "github.com/Chouette2100/srapi"
 )
 
 /*
@@ -66,9 +66,38 @@ type User struct {
 	Currentevent string
 }
 
-type Wuser User
+type Wuser struct {
+	Userno    int
+	Userid    string
+	User_name string
+	Longname  string
+	Shortname string
+	Genre     string
+	// GenreID      int
+	Rank  string
+	Nrank string
+	Prank string
+	// Irank        int
+	// Inrank       int
+	// Iprank       int
+	// Itrank       int
+	Level        int
+	Followers    int
+	Fans         int
+	FanPower     int
+	Fans_lst     int
+	FanPower_lst int
+	Ts           time.Time
+	Getp         string
+	Graph        string
+	Color        string
+	Currentevent string
+}
+
 
 /*
+type Wuser User
+
 type Wuser struct {
 	Userno       int
 	Userid       string
@@ -139,9 +168,9 @@ func MakeSortKeyOfRank(rank string, nextscore int) (
 	return
 }
 
+
 /*
-ルーム番号 user.Userno が テーブル user に存在しないときは新しいデータを挿入し、存在するときは 既存のデータを更新する。
-*/
+// ルーム番号 user.Userno が テーブル user に存在しないときは新しいデータを挿入し、存在するときは 既存のデータを更新する。
 func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User, lmin int, wait int) (
 	err error,
 ) {
@@ -182,9 +211,7 @@ func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User, lmin 
 	return
 }
 
-/*
-テーブル user を SHOWROOMのAPI api/roomprofile を使って得られる情報で更新する。
-*/
+// テーブル user を SHOWROOMのAPI api/roomprofile を使って得られる情報で更新する。
 func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 	err error,
 ) {
@@ -349,9 +376,7 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 	return
 }
 
-/*
-テーブル user に新しいデータを追加する
-*/
+// テーブル user に新しいデータを追加する
 func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 	user *User,
 	err error,
@@ -466,9 +491,7 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 	return
 }
 
-/*
-ルーム番号 user.Userno が テーブル user に存在しないときは新しいデータを挿入し、存在するときは 既存のデータを更新する。
-*/
+// ルーム番号 user.Userno が テーブル user に存在しないときは新しいデータを挿入し、存在するときは 既存のデータを更新する。
 func UpinsWuserSetProperty(client *http.Client, tnow time.Time, wuser *Wuser, lmin int, wait int) (
 	err error,
 ) {
@@ -502,9 +525,7 @@ func UpinsWuserSetProperty(client *http.Client, tnow time.Time, wuser *Wuser, lm
 	return
 }
 
-/*
-テーブル user を SHOWROOMのAPI api/roomprofile を使って得られる情報で更新する。
-*/
+// テーブル user を SHOWROOMのAPI api/roomprofile を使って得られる情報で更新する。
 func UpdateWuserSetProperty(client *http.Client, tnow time.Time, wuser *Wuser) (
 	err error,
 ) {
@@ -590,9 +611,7 @@ func UpdateWuserSetProperty(client *http.Client, tnow time.Time, wuser *Wuser) (
 	return
 }
 
-/*
-テーブル user に新しいデータを追加する
-*/
+// テーブル user に新しいデータを追加する
 func InsertIntoWuser(client *http.Client, tnow time.Time, userno int) (
 	err error,
 ) {
@@ -675,3 +694,4 @@ func InsertIntoWuser(client *http.Client, tnow time.Time, userno int) (
 	log.Printf("INSERT userno=%d rank=%s nscore=%d pscore=%d longname=%s\n", wuser.Userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
 	return
 }
+*/

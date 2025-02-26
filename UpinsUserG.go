@@ -36,6 +36,7 @@ import (
 
 //	const Version = "0.1.1"
 
+/*
 type TWuser struct {
 	Userno    int
 	Userid    string
@@ -63,6 +64,7 @@ type TWuser struct {
 	Color        string
 	Currentevent string
 }
+	*/
 
 // UserT is an interface for User
 type UserT interface {
@@ -80,12 +82,13 @@ func (u *User) Get() (
 }
 
 func (u *User) Set(nu *User) (err error) {
+	// u = new(User)
 	*u = *nu
 	return nil
 }
 
 // Getter and Setter for TWuser
-func (twu *TWuser) Get() (
+func (twu *Wuser) Get() (
 	result *User,
 	err error,
 ) {
@@ -98,7 +101,8 @@ func (twu *TWuser) Get() (
 	return
 }
 
-func (twu *TWuser) Set(nu *User) (err error) {
+func (twu *Wuser) Set(nu *User) (err error) {
+	// twu = new(Wuser)
 	err = copier.Copy(twu, nu)
 	if err != nil {
 		err = fmt.Errorf("copier.Copy failed: %w", err)
@@ -124,10 +128,10 @@ func GetLastUserdata[T UserT](
 	switch any(xuser).(type) {
 	case User:
 		user1 = any(new(User)).(T)
-		user2 = any(new(TWuser)).(T)
+		user2 = any(new(Wuser)).(T)
 
-	case TWuser:
-		user1 = any(new(TWuser)).(T)
+	case Wuser:
+		user1 = any(new(Wuser)).(T)
 		user2 = any(new(User)).(T)
 	}
 
@@ -176,7 +180,7 @@ func GetLastUserdata[T UserT](
 func UpinsUser[T UserT](
 	client *http.Client,
 	tnow time.Time,
-	xuser *T, // xuser.Userno が使用される。更新対象がuserであるかtwuserであるかを判定するためにxuserが使用される。
+	xuser T, // xuser.Userno が使用される。更新対象がuserであるかtwuserであるかを判定するためにxuserが使用される。
 	lmin int, // DBのデータがlmin分より古いときはAPIでデータを取得して、内容が現在と異なるときは更新する。
 	wait int, // APIでデータを取得したときは（アクセス制限を受けないように）waitミリ秒待つ。
 ) (
@@ -184,52 +188,91 @@ func UpinsUser[T UserT](
 	err error,
 ) {
 
-	// xuser.Userno を取得する。
-	var user *User
-	user, err = (*xuser).Get()
+	var vdata *User
+	var estatus int
+	var user User
+	copier.Copy(&user, xuser)
+	estatus, vdata, err = GetLastUserdata(xuser, lmin)
 	if err != nil {
-		err = fmt.Errorf("failed to get user: %w", err)
+		err = fmt.Errorf("GetLastUserdata(userno=%d) returned error. %w", user.Userno, err)
 		return
 	}
-	userno := user.Userno
-
-	// テーブル xuser のデータを取得する。
-	rxuser, err = SelectUserdata(xuser, userno)
-	if err != nil {
-		// データベースエラー
-		err = fmt.Errorf("Get(xuser=%+v) returned error. %w", xuser, err)
-		return
-	} else {
-		if rxuser == nil {
-			// テーブル xuser にデータが存在しないのでAPIでデータを取得して挿入する。
-			rxuser, err = InsertUsertable(client, tnow, wait, xuser)
+	switch estatus {
+	case 0:
+		// vdata, err = InsertIntoUser(client, tnow, user.Userno)
+		_, err = InsertUsertable(client, tnow, wait, xuser)
+		if err != nil {
+			err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", user.Userno, err)
+			return
+		}
+		time.Sleep(time.Duration(wait) * time.Millisecond)
+		// InsertUserhistory(&Userhistory{}, vdata)
+	case 1:
+		_, err = UpdateUsertable(client, tnow, wait, xuser)
+		if err != nil {
+			err = fmt.Errorf("Dbmap.Insert(userno=%d) returned error. %w", user.Userno, err)
+			return
+		}
+		time.Sleep(time.Duration(wait) * time.Millisecond)
+	case 2: // 2: userに新しいデータがあるのでwuserのデータを更新する
+		switch any(xuser).(type) {
+		case Wuser:
+			var wdata Wuser
+			copier.Copy(&wdata, xuser)
+			_, err = Dbmap.Update(wdata)
+		}
+	case 3: // 3: wuserに新しいデータがあるのでuserのデータを更新する
+		switch any(xuser).(type) {
+		case User:
+			_, err = Dbmap.Update(vdata)
 			if err != nil {
-				err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", userno, err)
-			}
-		} else {
-			// テーブル xuser にデータが存在するので、データが古いかどうかを判定してAPIでデータを取得して更新する。
-			ruser, _ := (*rxuser).Get() // rxuser.Get() とするとコンパイラが型推論できないらしい。
-			//	lastrank := usert.Rank
-			if ruser.Ts.After(tnow.Add(time.Duration(-lmin) * time.Minute)) {
-				// データが古くないので更新しない。
-				log.Printf("skipped. UpinsUser(userno=%d rank=%s %s)  %v",
-					ruser.Userno, ruser.Rank, ruser.User_name, ruser.Ts)
+				err = fmt.Errorf("Dbmap.Update(userno=%d) returned error. %w", user.Userno, err)
 				return
 			}
-			// APIでデータを取得し必要に応じて更新する。
-			rxuser, err = UpdateUsertable(client, tnow, wait, xuser)
-			if err != nil {
-				err = fmt.Errorf("UpdateUserSetProperty(userno=%d) returned error. %w", ruser.Userno, err)
-			}
-			//	log.Printf("UpinsUserSetProperty(userno=%d %s) lastrank=%s -> %s", user.Userno, usert.User_name, lastrank, usert.Rank)
+		default:
 		}
+	default:
 	}
+
+	/*
+		// テーブル xuser のデータを取得する。
+		rxuser, err = SelectUserdata(xuser, userno)
+		if err != nil {
+			// データベースエラー
+			err = fmt.Errorf("Get(xuser=%+v) returned error. %w", xuser, err)
+			return
+		} else {
+			if rxuser == nil {
+				// テーブル xuser にデータが存在しないのでAPIでデータを取得して挿入する。
+				rxuser, err = InsertUsertable(client, tnow, wait, xuser)
+				if err != nil {
+					err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", userno, err)
+				}
+			} else {
+				// テーブル xuser にデータが存在するので、データが古いかどうかを判定してAPIでデータを取得して更新する。
+				ruser, _ := (*rxuser).Get() // rxuser.Get() とするとコンパイラが型推論できないらしい。
+				//	lastrank := usert.Rank
+				if ruser.Ts.After(tnow.Add(time.Duration(-lmin) * time.Minute)) {
+					// データが古くないので更新しない。
+					log.Printf("skipped. UpinsUser(userno=%d rank=%s %s)  %v",
+						ruser.Userno, ruser.Rank, ruser.User_name, ruser.Ts)
+					return
+				}
+				// APIでデータを取得し必要に応じて更新する。
+				rxuser, err = UpdateUsertable(client, tnow, wait, xuser)
+				if err != nil {
+					err = fmt.Errorf("UpdateUserSetProperty(userno=%d) returned error. %w", ruser.Userno, err)
+				}
+				//	log.Printf("UpinsUserSetProperty(userno=%d %s) lastrank=%s -> %s", user.Userno, usert.User_name, lastrank, usert.Rank)
+			}
+		}
+	*/
 
 	return
 }
 
 // テーブル user からデータを取得する。
-func SelectUserdata[T UserT](xu *T, userno int) (
+func SelectUserdata[T UserT](xu T, userno int) (
 	result *T,
 	err error,
 ) {
@@ -252,7 +295,7 @@ func SelectUserdata[T UserT](xu *T, userno int) (
 
 /*
 テーブル user を SHOWROOMのAPI api/roomprofile を使って得られる情報で更新する。
-func UpdateUsertable[T UserT](xu *T) (err error) {
+func UpdateUsertable[T UserT](xu T) (err error) {
 
 	var nr int64
 	nr, err = Dbmap.Update(xu)
@@ -266,12 +309,12 @@ func UpdateUsertable[T UserT](xu *T) (err error) {
 */
 
 // SHOWROOMのAPI api/roomprofile を使って得られる情報でユーザテーブルを更新する。
-func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, wait int, xuser *T) (
+func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, wait int, xuser T) (
 	rxuser *T,
 	err error,
 ) {
 
-	tuser, _ := (*xuser).Get()
+	tuser, _ := (xuser).Get()
 
 	lastrank := tuser.Rank
 
@@ -348,9 +391,10 @@ func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, wait int, xus
 	// rxuser = new(T)
 	// nuser.Set(tuser)    NG  コンパイラが型推論できない
 	// (UserT(*nuser)).Set(tuser) OK?
-	(*xuser).Set(tuser)
-	rxuser = xuser
-	_, err = Dbmap.Update(*xuser)
+	xuser.Set(tuser)
+	rxuser = new(T)
+	*rxuser = xuser
+	_, err = Dbmap.Update(xuser)
 	if err != nil {
 		log.Printf("error! %v", err)
 		return
@@ -369,14 +413,14 @@ func InsertUsertable[T UserT](
 	client *http.Client,
 	tnow time.Time,
 	wait int, // srapi.RoomInfAll()実行後の待ち時間(ms)
-	xuser *T,
+	xuser T,
 ) (
 	rxuser *T,
 	err error,
 ) {
 
 	var user *User
-	user, err = (*xuser).Get()
+	user, err = xuser.Get()
 	if err != nil {
 		err = fmt.Errorf("failed to get user: %w", err)
 		return
@@ -451,13 +495,13 @@ func InsertUsertable[T UserT](
 	user.Currentevent = eurla[len(eurla)-1]
 
 	//	cnt, err := Dbmap.Update(user)
-	rxuser = new(T)
-	(*rxuser).Set(user)
-	err = Dbmap.Insert(rxuser)
+	xuser.Set(user)
+	err = Dbmap.Insert(xuser)
 	if err != nil {
 		log.Printf("error! %v", err)
 		return
 	}
+	rxuser = &xuser
 	//	log.Printf("cnt = %d\n", cnt)
 
 	log.Printf("INSERT userno=%d rank=%s nscore=%d pscore=%d longname=%s\n",

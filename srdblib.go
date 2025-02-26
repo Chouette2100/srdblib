@@ -54,9 +54,11 @@ import (
 01AV00	UpinsUserG.goを新たに作成する。
 01AV01	UpinsUserSetProperty()で最近のデータで更新が必要なくなった場合はウェイトしないようにする。
 01AW01  ユーザテーブルの更新で無駄な更新やウェイトを行わないようにする。
+01AW02  ジェネリック関数をfunc .....[T userT](xu T,...)の形に統一する。
+01AW03  UserTのセッターの使い方を変更する。
 */
 
-const Version = "01AW01"
+const Version = "01AW03"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

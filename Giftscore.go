@@ -116,10 +116,12 @@ func InserIntoGiftScore(
 	err error,
 ) {
 
+	// user := new(User)
 	user := new(User)
 	user.Userno = cgr.RoomID
 	//	err = UpinsUserSetProperty(client, tnow, user, 1440*7, 100)
-	err = UpinsUserSetProperty(client, tnow, user, Env.Lmin, Env.Waitmsec)
+	// err = UpinsUserSetProperty(client, tnow, user, Env.Lmin, Env.Waitmsec)
+	_, err = UpinsUser(client, tnow, user, Env.Lmin, Env.Waitmsec)
 	if err != nil {
 		err = fmt.Errorf("UpinsUserSetProperty error: %v", err)
 		log.Printf("UpinsUserSetProperty error: %v", err)
