@@ -106,6 +106,70 @@ func (twu *TWuser) Set(nu *User) (err error) {
 	return
 }
 
+// userとtwuserのデータをデータベースから取得し、新しいデータを返す
+func GetLastUserdata[T UserT](
+	xuser T,
+	lmin int,
+) (
+	estatus int, // 0: user,wuserテーブルにデータない 1: データがあるが古い、 2: userに新しいデータがある 3: wuserに新しいデータがある
+	vdata *User,
+	err error,
+) {
+
+	var cuser *User
+	cuser, _ = xuser.Get()
+	userno := cuser.Userno
+
+	var user1, user2 T
+	switch any(xuser).(type) {
+	case User:
+		user1 = any(new(User)).(T)
+		user2 = any(new(TWuser)).(T)
+
+	case TWuser:
+		user1 = any(new(TWuser)).(T)
+		user2 = any(new(User)).(T)
+	}
+
+	intf, err := Dbmap.Get(user1, userno)
+	if err != nil {
+		// userテーブルのデータが取得できない
+		err = fmt.Errorf("Get(%d): database access error", userno)
+		return
+	} else if intf == nil {
+		// userテーブルのデータが存在しない
+		estatus = 0
+	} else {
+		// userテーブルのデータを仮の戻り値とする
+		user1 = any(intf).(T)
+		vdata, _ = user1.Get()
+		if vdata.Ts.After(time.Now().Add(time.Duration(-lmin) * time.Minute)) {
+			estatus = 2
+		} else {
+			estatus = 1
+		}
+	}
+
+	intf, err = Dbmap.Get(user2, userno)
+	if err != nil {
+		// userテーブルのデータが取得できない
+		err = fmt.Errorf("Get(%d): database access error", userno)
+		return
+	} else if intf != nil {
+		user2 = any(intf).(T)
+		tdata, _ := user2.Get()
+		if estatus == 0 || tdata.Ts.After(vdata.Ts) {
+			vdata = tdata
+			if vdata.Ts.After(time.Now().Add(time.Duration(-lmin) * time.Minute)) {
+				estatus = 3
+			} else {
+				estatus = 1
+			}
+		}
+	}
+	return
+}
+
 // ルーム番号 user.Userno が テーブル user に存在しないときはApiでユーザ情報を取得し新しいデータを挿入し、
 // 存在するときは そのデータがlimin分より古ければAPIでユーザ情報取得して既存のデータを更新する。
 // xuser は xuser.Userno のみが使用される。
@@ -124,7 +188,7 @@ func UpinsUser[T UserT](
 	var user *User
 	user, err = (*xuser).Get()
 	if err != nil {
-		err =  fmt.Errorf("failed to get user: %w", err)
+		err = fmt.Errorf("failed to get user: %w", err)
 		return
 	}
 	userno := user.Userno

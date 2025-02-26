@@ -160,7 +160,7 @@ func UpinsEventuser(
 				}
 			*/
 			//	user テーブルにusernoのデータを新たに作成する
-			err = InsertIntoUser(client, tnow, userno)
+			_, err= InsertIntoUser(client, tnow, userno)
 			if err != nil {
 				err = fmt.Errorf("InsertIntoUser(client, tnow, userno): %w", err)
 				return

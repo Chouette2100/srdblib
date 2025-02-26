@@ -91,24 +91,6 @@ type Wuser struct {
 }
 */
 
-// userの履歴を保存する構造体
-// PRIMARY KEY (`userno`,`ts`)
-type Userhistory struct {
-	Userno    int
-	User_name string
-	Genre     string
-	Rank      string
-	Nrank     string
-	Prank     string
-	Level     int
-	Followers int
-	Fans      int
-	Fans_lst  int
-	Ts        time.Time
-}
-
-type Wuserhistory Userhistory
-
 // Rank情報からランクのソートキーを作る
 func MakeSortKeyOfRank(rank string, nextscore int) (
 	irank int,
@@ -164,31 +146,37 @@ func UpinsUserSetProperty(client *http.Client, tnow time.Time, user *User, lmin 
 	err error,
 ) {
 
-	row, err := Dbmap.Get(User{}, user.Userno)
+	var vdata *User
+	var estatus int
+	estatus, vdata, err = GetLastUserdata(user, lmin)
 	if err != nil {
-		err = fmt.Errorf("Get(userno=%d) returned error. %w", user.Userno, err)
+		err = fmt.Errorf("GetLastUserdata(userno=%d) returned error. %w", user.Userno, err)
 		return err
-	} else {
-		if row == nil {
-			err = InsertIntoUser(client, tnow, user.Userno)
-			if err != nil {
-				err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", user.Userno, err)
-			}
-			time.Sleep(time.Duration(wait) * time.Millisecond)
-		} else {
-			usert := row.(*User)
-			//	lastrank := usert.Rank
-			if usert.Ts.After(tnow.Add(time.Duration(-lmin) * time.Minute)) {
-				log.Printf("skipped. UpinsUserSetProperty(userno=%d rank=%s %s)  %v", user.Userno, usert.Rank, usert.User_name, usert.Ts)
-				return nil
-			}
-			err = UpdateUserSetProperty(client, tnow, usert)
-			if err != nil {
-				err = fmt.Errorf("UpdateUserSetProperty(userno=%d) returned error. %w", user.Userno, err)
-			}
-			time.Sleep(time.Duration(wait) * time.Millisecond)
-			//	log.Printf("UpinsUserSetProperty(userno=%d %s) lastrank=%s -> %s", user.Userno, usert.User_name, lastrank, usert.Rank)
+	}
+	switch estatus {
+	case 0:
+		// vdata, err = InsertIntoUser(client, tnow, user.Userno)
+		_, err = InsertIntoUser(client, tnow, user.Userno)
+		if err != nil {
+			err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", user.Userno, err)
+			return
 		}
+		time.Sleep(time.Duration(wait) * time.Millisecond)
+		// InsertUserhistory(&Userhistory{}, vdata)
+	case 1:
+		err = UpdateUserSetProperty(client, tnow, user)
+		if err != nil {
+			err = fmt.Errorf("Dbmap.Insert(userno=%d) returned error. %w", user.Userno, err)
+			return
+		}
+		time.Sleep(time.Duration(wait) * time.Millisecond)
+	case 3:
+		_, err = Dbmap.Update(vdata)
+		if err != nil {
+			err = fmt.Errorf("Dbmap.Update(userno=%d) returned error. %w", user.Userno, err)
+			return
+		}
+	default:
 	}
 
 	return
@@ -365,14 +353,16 @@ func UpdateUserSetProperty(client *http.Client, tnow time.Time, user *User) (
 テーブル user に新しいデータを追加する
 */
 func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
+	user *User,
 	err error,
 ) {
 
 	//	ユーザーのランク情報を取得する
-	ria, err := srapi.ApiRoomProfile(client, fmt.Sprintf("%d", userno))
+	var ria *srapi.RoomInfAll
+	ria, err = srapi.ApiRoomProfile(client, fmt.Sprintf("%d", userno))
 	if err != nil {
 		err = fmt.Errorf("ApiRoomProfile(%d) returned error. %w", userno, err)
-		return err
+		return
 	}
 	if ria.Errors != nil {
 		//	データを取得できない場合処理を終了してしまうとuserからデータを取得できなくなってしまうので仮のデータを格納する。
@@ -385,10 +375,10 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 
 	if ria.ShowRankSubdivided == "" {
 		err = fmt.Errorf("ApiRoomProfile_All(%d) returned empty.ShowRankSubdivided", userno)
-		return err
+		return
 	}
 
-	user := new(User)
+	user = new(User)
 
 	user.Userno = userno
 	user.Userid = ria.RoomURLKey
@@ -407,10 +397,11 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 	user.Level = ria.RoomLevel
 	user.Followers = ria.FollowerNum
 
-	pafr, err := srapi.ApiActivefanRoom(client, strconv.Itoa(user.Userno), tnow.Format("200601"))
+	var pafr *srapi.ActivefanRoom
+	pafr, err = srapi.ApiActivefanRoom(client, strconv.Itoa(user.Userno), tnow.Format("200601"))
 	if err != nil {
 		err = fmt.Errorf("ApiActivefanRoom(%d) returned error. %w", user.Userno, err)
-		return err
+		return
 	}
 	user.Fans = pafr.TotalUserCount
 	user.FanPower = pafr.FanPower
@@ -423,7 +414,7 @@ func InsertIntoUser(client *http.Client, tnow time.Time, userno int) (
 	pafr, err = srapi.ApiActivefanRoom(client, strconv.Itoa(user.Userno), fmt.Sprintf("%04d%02d", yy, mm))
 	if err != nil {
 		err = fmt.Errorf("ApiActivefanRoom(%d) returned error. %w", user.Userno, err)
-		return err
+		return
 	}
 	user.Fans_lst = pafr.TotalUserCount
 	user.FanPower_lst = pafr.FanPower

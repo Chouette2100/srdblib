@@ -53,9 +53,10 @@ import (
 		ポインターレシーバでないものが混在するときの処理を確認する（Print()、確認の上、コメントアウトする）
 01AV00	UpinsUserG.goを新たに作成する。
 01AV01	UpinsUserSetProperty()で最近のデータで更新が必要なくなった場合はウェイトしないようにする。
+01AW01  ユーザテーブルの更新で無駄な更新やウェイトを行わないようにする。
 */
 
-const Version = "01AV01"
+const Version = "01AW01"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
