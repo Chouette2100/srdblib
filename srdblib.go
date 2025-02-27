@@ -56,9 +56,10 @@ import (
 01AW01  ユーザテーブルの更新で無駄な更新やウェイトを行わないようにする。
 01AW02  ジェネリック関数をfunc .....[T userT](xu T,...)の形に統一する。
 01AW03  UserTのセッターの使い方を変更する。
+01AW04  UpinsUser(), UpinsEventuser()のデータベース格納値の調整を行う。
 */
 
-const Version = "01AW03"
+const Version = "01AW04"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

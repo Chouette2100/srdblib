@@ -160,9 +160,19 @@ func UpinsEventuserG[T EventuserR](xeu T, tnow time.Time) (err error) {
 		} else {
 			teu.Graph = "N"
 		}
-		teu.Color = Colorlist2[(teu.Vld-1)%len(Colorlist2)].Name
-		// TODO: Vldがマイナスのときの処理を追加（あるいはレベルイベントのときの処理を追加）
-
+		if teu.Vld == 0 {
+			teu.Color = "red"
+		} else {
+			if teu.Vld == 0 || teu.Vld == 1 {
+				teu.Color = "red"
+			} else {
+				teu.Color = Colorlist2[(teu.Vld-1)%len(Colorlist2)].Name
+			}
+		}
+		if teu.Vld == 0 {
+			// 順位非表示にする
+			teu.Vld = -1
+		}
 		xeu.Set(teu)
 		err = InsertEutable(xeu)
 		if err != nil {
@@ -192,7 +202,11 @@ func UpinsEventuserG[T EventuserR](xeu T, tnow time.Time) (err error) {
 			teu.Graph = "N"
 		}
 
-		teu.Color = Colorlist2[(teu.Vld-1)%len(Colorlist2)].Name
+		if teu.Vld < 1 {
+			teu.Color = "red"
+		} else {
+			teu.Color = Colorlist2[(teu.Vld-1)%len(Colorlist2)].Name
+		}
 
 		teu.Istarget = ceu.Istarget
 		teu.Iscntrbpoints = ceu.Iscntrbpoints

@@ -188,6 +188,8 @@ func UpinsUser[T UserT](
 	err error,
 ) {
 
+	rxuser = &xuser
+
 	var vdata *User
 	var estatus int
 	var user User
@@ -199,29 +201,33 @@ func UpinsUser[T UserT](
 	}
 	switch estatus {
 	case 0:
+		// テーブル user, wuser にデータが存在しないのでAPIでデータを取得して挿入する。
 		// vdata, err = InsertIntoUser(client, tnow, user.Userno)
-		_, err = InsertUsertable(client, tnow, wait, xuser)
+		rxuser, err = InsertUsertable(client, tnow, wait, xuser)
 		if err != nil {
 			err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", user.Userno, err)
 			return
 		}
 		time.Sleep(time.Duration(wait) * time.Millisecond)
 		// InsertUserhistory(&Userhistory{}, vdata)
-	case 1:
-		_, err = UpdateUsertable(client, tnow, wait, xuser)
+	case 1: // userあるいはwuserにデータは存在するが古いので更新が必要
+		copier.Copy(xuser, vdata)
+		rxuser, err = UpdateUsertable(client, tnow, wait, xuser)
 		if err != nil {
 			err = fmt.Errorf("Dbmap.Insert(userno=%d) returned error. %w", user.Userno, err)
 			return
 		}
 		time.Sleep(time.Duration(wait) * time.Millisecond)
-	case 2: // 2: userに新しいデータがあるのでwuserのデータを更新する
+	case 2: // 2: userに新しいデータがあるのそれでwuserのデータを更新する
+		copier.Copy(xuser, vdata)
 		switch any(xuser).(type) {
 		case Wuser:
 			var wdata Wuser
 			copier.Copy(&wdata, xuser)
 			_, err = Dbmap.Update(wdata)
 		}
-	case 3: // 3: wuserに新しいデータがあるのでuserのデータを更新する
+	case 3: // 3: wuserに新しいデータがあるのでそれでuserのデータを更新する
+		copier.Copy(xuser, vdata)
 		switch any(xuser).(type) {
 		case User:
 			_, err = Dbmap.Update(vdata)
