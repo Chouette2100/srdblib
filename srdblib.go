@@ -58,9 +58,10 @@ import (
 01AW03  UserTのセッターの使い方を変更する。
 01AW04  UpinsUser(), UpinsEventuser()のデータベース格納値の調整を行う。
 01AX00  UpinsUser()関連の関数、とくにジェネリック関数の整備を行う。
+01AX01  SelectEventuser()の引数の型をポインターとする（関数の戻り値がポインターのときの動きが理解しにくいため）
 */
 
-const Version = "01AX00"
+const Version = "01AX01"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

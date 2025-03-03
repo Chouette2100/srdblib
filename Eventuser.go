@@ -93,7 +93,7 @@ func (e *Weventuser) Set(ne *Eventuser) (err error) {
 // 	fmt.Printf("Wventuser: %+v\n", e)
 // }
 
-func SelectEudata[T EventuserR](xeu T, eventid string, userno int) (
+func SelectEudata[T EventuserR](xeu *T, eventid string, userno int) (
 	result *T,
 	err error,
 ) {
@@ -147,7 +147,7 @@ func UpinsEventuserG[T EventuserR](xeu T, tnow time.Time) (err error) {
 	// xeu.Print()
 	eventid := teu.Eventid
 	userno := teu.Userno
-	cxeu, err = SelectEudata(xeu, eventid, userno)
+	cxeu, err = SelectEudata(&xeu, eventid, userno)
 	if err != nil {
 		err = fmt.Errorf("Dbmap.Get failed: %w", err)
 		return
@@ -222,7 +222,7 @@ func UpinsEventuserG[T EventuserR](xeu T, tnow time.Time) (err error) {
 		// 	log.Printf("After: %v\n", teu)
 		// }
 
-		xeu.Set(ceu)
+		xeu.Set(teu)
 		err = UpdateEutable(xeu)
 		if err != nil {
 			err = fmt.Errorf("UpdateEutable failed: %w", err)
