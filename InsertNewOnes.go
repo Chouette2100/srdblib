@@ -178,7 +178,7 @@ func InsertNewOnes(
 			//	user テーブルにusernoのデータを新たに作成する
 			user := User{}
 			user.Userno = room.Room_id
-			_, err = InsertUsertable(client, tnow, Env.Waitmsec, &user)
+			_, err = InsertUsertable(client, tnow, &user)
 			if err != nil {
 				err = fmt.Errorf("InsertIntoUser(client, tnow, userno): %w", err)
 				return

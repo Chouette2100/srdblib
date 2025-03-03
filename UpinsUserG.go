@@ -64,7 +64,7 @@ type TWuser struct {
 	Color        string
 	Currentevent string
 }
-	*/
+*/
 
 // UserT is an interface for User
 type UserT interface {
@@ -113,61 +113,68 @@ func (twu *Wuser) Set(nu *User) (err error) {
 // userとtwuserのデータをデータベースから取得し、新しいデータを返す
 func GetLastUserdata[T UserT](
 	xuser T,
-	lmin int,
 ) (
-	estatus int, // 0: user,wuserテーブルにデータない 1: データがあるが古い、 2: userに新しいデータがある 3: wuserに新しいデータがある
+	estatus int,
+	// 0: データが存在せず、もうひとつのテーブルのデータも存在しないか古いのでAPIでデータを取得して挿入する。
+	// 1: データが古く、もうひとつのテーブルのデータも存在しないか古いのでAPIでデータを取得して更新する。
+	// 2: データが存在しないが、もうひとつのテーブルに新しいデータがあるのでそれを挿入する。
+	// 3: データが古いが、もうひとつのテーブルに新しいデータがあるのでそれで更新する。
+	// 4: 新しめのデータが存在する。更新は必要ない。
 	vdata *User,
 	err error,
 ) {
 
-	var cuser *User
-	cuser, _ = xuser.Get()
+	var cuser User
+	cuserPtr, _ := xuser.Get()
+	cuser = *cuserPtr
 	userno := cuser.Userno
 
-	var user1, user2 T
-	switch any(xuser).(type) {
-	case User:
-		user1 = any(new(User)).(T)
-		user2 = any(new(Wuser)).(T)
+	var tdata *User
+	var verr, terr error
+	var next UserT
 
-	case Wuser:
-		user1 = any(new(Wuser)).(T)
-		user2 = any(new(User)).(T)
+	vdata, verr = GetUserOrWuserData(xuser)
+	switch any(xuser).(type) {
+	case *User:
+		// vdata, verr, tdata, terr = getUserdataWithOtheruserdata(xuser, &Wuser{})
+		next = &Wuser{Userno: userno}
+	case *Wuser:
+		// vdata, verr, tdata, terr = getUserdataWithOtheruserdata(xuser, &User{})
+		next = &User{Userno: userno}
+	default:
+		err = fmt.Errorf("GetLastUserdata() invalid type of xuser")
+		return
 	}
 
-	intf, err := Dbmap.Get(user1, userno)
-	if err != nil {
+	if verr != nil {
 		// userテーブルのデータが取得できない
 		err = fmt.Errorf("Get(%d): database access error", userno)
 		return
-	} else if intf == nil {
+	} else if vdata == nil {
 		// userテーブルのデータが存在しない
 		estatus = 0
 	} else {
 		// userテーブルのデータを仮の戻り値とする
-		user1 = any(intf).(T)
-		vdata, _ = user1.Get()
-		if vdata.Ts.After(time.Now().Add(time.Duration(-lmin) * time.Minute)) {
-			estatus = 2
+		if vdata.Ts.After(time.Now().Add(time.Duration(-Env.Lmin) * time.Minute)) {
+			estatus = 4
 		} else {
 			estatus = 1
 		}
 	}
 
-	intf, err = Dbmap.Get(user2, userno)
-	if err != nil {
-		// userテーブルのデータが取得できない
-		err = fmt.Errorf("Get(%d): database access error", userno)
-		return
-	} else if intf != nil {
-		user2 = any(intf).(T)
-		tdata, _ := user2.Get()
-		if estatus == 0 || tdata.Ts.After(vdata.Ts) {
+	if estatus < 2 {
+		// TODO: ここで上で取得しなかったデータを取得すべき
+		tdata, terr = GetUserOrWuserData(next)
+		if terr != nil {
+			// userテーブルのデータが取得できない
+			err = fmt.Errorf("Get(%d): database access error", userno)
+			return
+		} else if tdata == nil {
+			return
+		} else {
 			vdata = tdata
-			if vdata.Ts.After(time.Now().Add(time.Duration(-lmin) * time.Minute)) {
-				estatus = 3
-			} else {
-				estatus = 1
+			if vdata.Ts.After(time.Now().Add(time.Duration(-Env.Lmin) * time.Minute)) {
+				estatus += 2
 			}
 		}
 	}
@@ -181,8 +188,6 @@ func UpinsUser[T UserT](
 	client *http.Client,
 	tnow time.Time,
 	xuser T, // xuser.Userno が使用される。更新対象がuserであるかtwuserであるかを判定するためにxuserが使用される。
-	lmin int, // DBのデータがlmin分より古いときはAPIでデータを取得して、内容が現在と異なるときは更新する。
-	wait int, // APIでデータを取得したときは（アクセス制限を受けないように）waitミリ秒待つ。
 ) (
 	rxuser *T,
 	err error,
@@ -194,50 +199,44 @@ func UpinsUser[T UserT](
 	var estatus int
 	var user User
 	copier.Copy(&user, xuser)
-	estatus, vdata, err = GetLastUserdata(xuser, lmin)
+	estatus, vdata, err = GetLastUserdata(xuser)
 	if err != nil {
 		err = fmt.Errorf("GetLastUserdata(userno=%d) returned error. %w", user.Userno, err)
 		return
 	}
 	switch estatus {
-	case 0:
-		// テーブル user, wuser にデータが存在しないのでAPIでデータを取得して挿入する。
+	case 0: // データが存在せず、もうひとつのテーブルのデータも存在しないか古いのでAPIでデータを取得して挿入する。
 		// vdata, err = InsertIntoUser(client, tnow, user.Userno)
-		rxuser, err = InsertUsertable(client, tnow, wait, xuser)
+		rxuser, err = InsertUsertable(client, tnow, xuser)
 		if err != nil {
 			err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", user.Userno, err)
 			return
 		}
-		time.Sleep(time.Duration(wait) * time.Millisecond)
-		// InsertUserhistory(&Userhistory{}, vdata)
-	case 1: // userあるいはwuserにデータは存在するが古いので更新が必要
+		InsertUserhistory(&Userhistory{}, vdata)
+	case 1: // データが古く、もうひとつのテーブルのデータも存在しないか古いのでAPIでデータを取得して更新する。
 		copier.Copy(xuser, vdata)
-		rxuser, err = UpdateUsertable(client, tnow, wait, xuser)
+		rxuser, err = UpdateUsertable(client, tnow, xuser)
 		if err != nil {
 			err = fmt.Errorf("Dbmap.Insert(userno=%d) returned error. %w", user.Userno, err)
 			return
 		}
-		time.Sleep(time.Duration(wait) * time.Millisecond)
-	case 2: // 2: userに新しいデータがあるのそれでwuserのデータを更新する
+	case 2: // データが存在しないが、もうひとつのテーブルに新しいデータがあるのでそれを挿入する。
 		copier.Copy(xuser, vdata)
-		switch any(xuser).(type) {
-		case Wuser:
-			var wdata Wuser
-			copier.Copy(&wdata, xuser)
-			_, err = Dbmap.Update(wdata)
-		}
-	case 3: // 3: wuserに新しいデータがあるのでそれでuserのデータを更新する
+		err = Dbmap.Insert(xuser)
+	case 3: // データが古いが、もうひとつのテーブルに新しいデータがあるのでそれで更新する。
 		copier.Copy(xuser, vdata)
+		_, err = Dbmap.Update(xuser)
+	case 4: // 新しめのデータが存在する。更新は必要ない。
+		log.Printf("UpinsUser() user=%+v is up to date\n", user.Userno)
+	default:
+	}
+	if estatus == 1 || estatus == 2 {
 		switch any(xuser).(type) {
 		case User:
-			_, err = Dbmap.Update(vdata)
-			if err != nil {
-				err = fmt.Errorf("Dbmap.Update(userno=%d) returned error. %w", user.Userno, err)
-				return
-			}
+			InsertUserhistory(&Userhistory{}, vdata)
 		default:
+			log.Printf("UpinsUser() InsertUserhistory() not executed\n")
 		}
-	default:
 	}
 
 	/*
@@ -258,7 +257,7 @@ func UpinsUser[T UserT](
 				// テーブル xuser にデータが存在するので、データが古いかどうかを判定してAPIでデータを取得して更新する。
 				ruser, _ := (*rxuser).Get() // rxuser.Get() とするとコンパイラが型推論できないらしい。
 				//	lastrank := usert.Rank
-				if ruser.Ts.After(tnow.Add(time.Duration(-lmin) * time.Minute)) {
+				if ruser.Ts.After(tnow.Add(time.Duration(-Env.Lmin) * time.Minute)) {
 					// データが古くないので更新しない。
 					log.Printf("skipped. UpinsUser(userno=%d rank=%s %s)  %v",
 						ruser.Userno, ruser.Rank, ruser.User_name, ruser.Ts)
@@ -315,7 +314,7 @@ func UpdateUsertable[T UserT](xu T) (err error) {
 */
 
 // SHOWROOMのAPI api/roomprofile を使って得られる情報でユーザテーブルを更新する。
-func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, wait int, xuser T) (
+func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, xuser T) (
 	rxuser *T,
 	err error,
 ) {
@@ -331,6 +330,8 @@ func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, wait int, xus
 		err = fmt.Errorf("ApiRoomProfile_All(%d) returned error. %w", tuser.Userno, err)
 		return
 	}
+	time.Sleep(time.Duration(Env.Waitmsec) * time.Millisecond)
+
 	if ria.Errors != nil {
 		//	err = fmt.Errorf("ApiRoomProfile_All(%d) returned error. %v", userno, ria.Errors)
 		//	return err
@@ -407,8 +408,6 @@ func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, wait int, xus
 	}
 	//	log.Printf("cnt = %d\n", cnt)
 
-	time.Sleep(time.Duration(wait) * time.Millisecond)
-
 	log.Printf("UPDATE userno=%d rank=%s -> %s nscore=%d pscore=%d longname=%s\n",
 		tuser.Userno, lastrank, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
 	return
@@ -418,7 +417,6 @@ func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, wait int, xus
 func InsertUsertable[T UserT](
 	client *http.Client,
 	tnow time.Time,
-	wait int, // srapi.RoomInfAll()実行後の待ち時間(ms)
 	xuser T,
 ) (
 	rxuser *T,
@@ -440,7 +438,7 @@ func InsertUsertable[T UserT](
 		err = fmt.Errorf("ApiRoomProfile_All(%d) returned error. %w", userno, err)
 		return
 	}
-	time.Sleep(time.Duration(wait) * time.Millisecond)
+	time.Sleep(time.Duration(Env.Waitmsec) * time.Millisecond)
 	if ria.Errors != nil {
 		//	err = fmt.Errorf("ApiRoomProfile_All(%d) returned error. %v", userno, ria.Errors)
 		//	return err
@@ -512,5 +510,24 @@ func InsertUsertable[T UserT](
 
 	log.Printf("INSERT userno=%d rank=%s nscore=%d pscore=%d longname=%s\n",
 		userno, ria.ShowRankSubdivided, ria.NextScore, ria.PrevScore, ria.RoomName)
+	return
+}
+
+// func getUserdataWithOtheruserdata(user1 UserT, user2 UserT) (vdata *User, verr error, tdata *User, terr error) {
+func GetUserOrWuserData(user1 UserT) (vdata *User, verr error) {
+
+	cuser, _ := user1.Get()
+	var intf1 interface{}
+	// var intf1, intf2 interface{}
+
+	intf1, verr = Dbmap.Get(user1, cuser.Userno)
+	if verr == nil && intf1 != nil {
+		vdata, _ = any(intf1).(UserT).Get()
+	}
+
+	// intf2, terr = Dbmap.Get(user2, cuser.Userno)
+	// if terr == nil && intf2 != nil {
+	// 	tdata, _ = any(intf2).(UserT).Get()
+	// }
 	return
 }

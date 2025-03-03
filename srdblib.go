@@ -57,9 +57,10 @@ import (
 01AW02  ジェネリック関数をfunc .....[T userT](xu T,...)の形に統一する。
 01AW03  UserTのセッターの使い方を変更する。
 01AW04  UpinsUser(), UpinsEventuser()のデータベース格納値の調整を行う。
+01AX00  UpinsUser()関連の関数、とくにジェネリック関数の整備を行う。
 */
 
-const Version = "01AW04"
+const Version = "01AX00"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

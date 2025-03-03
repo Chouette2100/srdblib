@@ -48,7 +48,7 @@ type ViewerHistory struct{
 /*
 テーブルviewerにリスナーの新規登録（あるいは更新登録）を行う
 */
-func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer, lmin int) (
+func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer) (
 	err error,
 ) {
 
@@ -143,7 +143,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer,
 				return err
 			}
 			log.Printf(" ** INSERT(viewerhistory) viewid=%10d name=%s\n", vwh.Viewerid, vwh.Name)
-		} else if tnow.Sub(vwh.Ts) > time.Duration(lmin)*time.Minute && vwh.Name != viewer.Name {
+		} else if tnow.Sub(vwh.Ts) > time.Duration(Env.Lmin)*time.Minute && vwh.Name != viewer.Name {
 			vw.Name = viewer.Name
 			vw.Ts = tnow
 			_, err = Dbmap.Update(vw)
