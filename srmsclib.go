@@ -19,8 +19,6 @@ import (
 	//	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/dustin/go-humanize"
-
-	//	"github.com/Chouette2100/exsrapi"
 )
 
 func SelectEventNoAndName(tevent, eventid string) (

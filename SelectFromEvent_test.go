@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Chouette2100/exsrapi"
+	"github.com/Chouette2100/exsrapi/v2"
 )
 
 func TestSelectFromEvent(t *testing.T) {

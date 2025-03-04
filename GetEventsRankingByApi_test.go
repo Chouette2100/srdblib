@@ -14,8 +14,8 @@ import (
 
 	"github.com/go-gorp/gorp"
 
-	"github.com/Chouette2100/exsrapi"
-	"github.com/Chouette2100/srapi"
+	"github.com/Chouette2100/exsrapi/v2"
+	"github.com/Chouette2100/srapi/v2"
 )
 
 func TestGetEventsRankingByApi(t *testing.T) {

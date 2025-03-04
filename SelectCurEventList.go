@@ -7,7 +7,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/Chouette2100/exsrapi"
+	"github.com/Chouette2100/exsrapi/v2"
 )
 
 // DBから現在開催中のイベントを抜き出す

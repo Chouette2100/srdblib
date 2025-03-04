@@ -20,8 +20,7 @@ import (
 
 	"github.com/go-gorp/gorp"
 
-	"github.com/Chouette2100/exsrapi"
-	//	ghsrapi "github.com/Chouette2100/srapi"
+	"github.com/Chouette2100/exsrapi/v2"
 )
 
 /*

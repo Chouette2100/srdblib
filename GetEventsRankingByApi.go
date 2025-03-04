@@ -11,8 +11,7 @@ import (
 
 	"net/http"
 
-	"github.com/Chouette2100/srapi"
-	//	"github.com/Chouette2100/srdblib"
+	"github.com/Chouette2100/srapi/v2"
 )
 
 func GetEventsRankingByApi(

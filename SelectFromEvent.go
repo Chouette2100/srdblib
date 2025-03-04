@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Chouette2100/exsrapi"
+	"github.com/Chouette2100/exsrapi/v2"
 )
 
 func SelectFromEvent(

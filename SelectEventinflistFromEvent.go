@@ -8,7 +8,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/Chouette2100/exsrapi"
+	"github.com/Chouette2100/exsrapi/v2"
 )
 
 // 指定した条件に該当するイベントのリストを作る。

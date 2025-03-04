@@ -12,7 +12,7 @@ import (
 
 	"github.com/jinzhu/copier"
 	// "github.com/mitchellh/copystructure"
-	// "github.com/Chouette2100/srapi"
+	// "github.com/Chouette2100/srapi/v2"
 )
 
 type EventuserR interface {

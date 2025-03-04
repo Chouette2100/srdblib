@@ -20,8 +20,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/jinzhu/copier"
 
-	//	"github.com/Chouette2100/exsrapi"
-	"github.com/Chouette2100/srapi"
+	"github.com/Chouette2100/srapi/v2"
 )
 
 /*

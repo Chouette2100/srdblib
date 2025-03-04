@@ -21,9 +21,6 @@ import (
 	//      "gopkg.in/gorp.v2"
 
 	// "github.com/dustin/go-humanize"
-
-	//	"github.com/Chouette2100/exsrapi"
-	// "github.com/Chouette2100/srapi"
 )
 
 /*

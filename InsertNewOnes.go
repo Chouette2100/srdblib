@@ -16,8 +16,8 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/Chouette2100/exsrapi"
-	"github.com/Chouette2100/srapi"
+	"github.com/Chouette2100/exsrapi/v2"
+	"github.com/Chouette2100/srapi/v2"
 )
 
 // 日本語名のジャンルを英語名に変換する

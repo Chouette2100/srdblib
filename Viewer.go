@@ -17,9 +17,6 @@ import (
 	//	"github.com/go-gorp/gorp"
 
 	//	"github.com/dustin/go-humanize"
-
-	//	"github.com/Chouette2100/exsrapi"
-	//	"github.com/Chouette2100/srapi"
 )
 
 /*

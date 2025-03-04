@@ -15,8 +15,6 @@ import (
 
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-	//	"github.com/Chouette2100/exsrapi"
-	//	"github.com/Chouette2100/srapi"
 )
 
 // イベントに新しいユーザを追加する
