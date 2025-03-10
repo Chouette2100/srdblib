@@ -60,9 +60,10 @@ import (
 01AX00  UpinsUser()関連の関数、とくにジェネリック関数の整備を行う。
 01AX01  SelectEventuser()の引数の型をポインターとする（関数の戻り値がポインターのときの動きが理解しにくいため）
 01AY00  使用しているパッケージをすえてv2に変更する。
+01AZ00  ExtractStructColumns()を作成する。EventR型を作成する。
 */
 
-const Version = "01AX01"
+const Version = "01AZ01"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
@@ -75,6 +76,8 @@ var Env Environment = Environment{
 	Lmin: 14400, //	viewer, user で前回更新から10日間以上経っていれば更新する(UpdateUserSetPropertyのようにこの値を使わない場合もある)
 	Waitmsec: 100, //	viewer, user で新しいデータをinsertしてから1秒間待つ(APIにアクセス制限があるように思えるため)
 }
+
+var AllColumns map[string]string
 
 /*
 type Event_Inf struct {
