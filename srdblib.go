@@ -61,9 +61,10 @@ import (
 01AX01  SelectEventuser()の引数の型をポインターとする（関数の戻り値がポインターのときの動きが理解しにくいため）
 01AY00  使用しているパッケージをすえてv2に変更する。
 01AZ00  ExtractStructColumns()を作成する。EventR型を作成する。
+01BA00  UpinsUser()のinsertとupdateでirankなどが設定されていない不具合を修正する。ExtractStructColumns()がタグなしでも動作するようにする。
 */
 
-const Version = "01AZ01"
+const Version = "01BA00"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

@@ -350,16 +350,16 @@ func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, xuser T) (
 	//	user.Longname =		新規作成時に設定され、変更はSRCGIで行う
 	//	user.Shortname =　　〃
 	tuser.Genre = ria.GenreName
-	//	wuser.GenreID = ria.GenreID
+	tuser.GenreID = ria.GenreID
 	tuser.Rank = ria.ShowRankSubdivided
 	tuser.Nrank = humanize.Comma(int64(ria.NextScore))
 	tuser.Prank = humanize.Comma(int64(ria.PrevScore))
-	//	wuser.Irank = MakeSortKeyOfRank(ria.ShowRankSubdivided, ria.NextScore)
-	//	wuser.Inrank = ria.NextScore
-	//	wuser.Iprank = ria.PrevScore
-	//	if wuser.Itrank > user.Irank {
-	//		user.Itrank = user.Irank
-	//	}
+	tuser.Irank = MakeSortKeyOfRank(ria.ShowRankSubdivided, ria.NextScore)
+	tuser.Inrank = ria.NextScore
+	tuser.Iprank = ria.PrevScore
+	if tuser.Itrank > tuser.Irank {
+		tuser.Itrank = tuser.Irank
+	}
 	tuser.Level = ria.RoomLevel
 	tuser.Followers = ria.FollowerNum
 
@@ -370,7 +370,7 @@ func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, xuser T) (
 		return
 	}
 	tuser.Fans = pafr.TotalUserCount
-	//	wuser.FanPower = pafr.FanPower
+	tuser.FanPower = pafr.FanPower
 	yy := tnow.Year()
 	mm := tnow.Month() - 1
 	if mm < 0 {
@@ -456,14 +456,14 @@ func InsertUsertable[T UserT](
 	user.Longname = ria.RoomName
 	user.Shortname = strconv.Itoa(userno % 100)
 	user.Genre = ria.GenreName
-	//	wuser.GenreID = ria.GenreID
+	user.GenreID = ria.GenreID
 	user.Rank = ria.ShowRankSubdivided
 	user.Nrank = humanize.Comma(int64(ria.NextScore))
 	user.Prank = humanize.Comma(int64(ria.PrevScore))
-	//	wuser.Irank = MakeSortKeyOfRank(ria.ShowRankSubdivided, ria.NextScore)
-	//	wuser.Inrank = ria.NextScore
-	//	wuser.Iprank = ria.PrevScore
-	//	wuser.Itrank = user.Irank
+	user.Irank = MakeSortKeyOfRank(ria.ShowRankSubdivided, ria.NextScore)
+	user.Inrank = ria.NextScore
+	user.Iprank = ria.PrevScore
+	user.Itrank = user.Irank
 	user.Level = ria.RoomLevel
 	user.Followers = ria.FollowerNum
 
@@ -474,7 +474,7 @@ func InsertUsertable[T UserT](
 		return
 	}
 	user.Fans = pafr.TotalUserCount
-	//	wuser.FanPower = pafr.FanPower
+	user.FanPower = pafr.FanPower
 	yy := tnow.Year()
 	mm := tnow.Month() - 1
 	if mm < 0 {

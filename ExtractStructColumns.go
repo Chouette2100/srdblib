@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const key = "yaml" // struct tag key
+const key = "json" // struct tag key
 
 // ExtractStructColumns returns a comma-separated string of struct fields.
 func ExtractStructColumns(model interface{}) string {
@@ -35,10 +35,15 @@ func collectColumns(t reflect.Type, columns *[]string) {
 			// 埋め込みフィールドの場合、再帰的に処理
 			collectColumns(field.Type, columns)
 		} else {
+			var columnName string
 			if tag := field.Tag.Get(key); tag != "" {
-				if column := strings.Split(tag, ";")[0]; column != "" {
-					*columns = append(*columns, column)
-				}
+				columnName = strings.Split(tag, ";")[0]
+			} else {
+				// jsonタグがない場合はフィールド名を小文字に変換して使用
+				columnName = strings.ToLower(field.Name)
+			}
+			if columnName != "" {
+				*columns = append(*columns, columnName)
 			}
 		}
 	}
