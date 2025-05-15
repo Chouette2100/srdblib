@@ -37,19 +37,19 @@ func GetEventsRankingByApi(
 	event := row.(*Event)
 
 	//	mode==1のときイベント終了後ならエラーとする。
-	if mode == 1 && time.Now().After(event.Endtime.Add(1 * time.Minute)) {
+	if mode == 1 && time.Now().After(event.Endtime.Add(1*time.Minute)) {
 		//	err = fmt.Errorf("%s has ended", event.Eventid)
 		pranking = &srapi.Eventranking{}
-		r := make( []struct {
-                Point int `json:"point"`
-                Room  struct {
-                        Name        string `json:"name"`
-                        ImageSquare string `json:"image_square"`
-                        RoomID      int    `json:"room_id"`
-                        Image       string `json:"image"`
-                } `json:"room"`
-                Rank int `json:"rank"`
-        },0)
+		r := make([]struct {
+			Point int `json:"point"`
+			Room  struct {
+				Name        string `json:"name"`
+				ImageSquare string `json:"image_square"`
+				RoomID      int    `json:"room_id"`
+				Image       string `json:"image"`
+			} `json:"room"`
+			Rank int `json:"rank"`
+		}, 0)
 		pranking.Ranking = r
 		return
 	}
@@ -57,18 +57,26 @@ func GetEventsRankingByApi(
 	// イベントに参加しているルームを取得する
 	//	ApiEventsRanking()にはイベントにエントリーしているルームのルームIDとが一つ必要だから
 	//	REVIEW:  ブロックイベントの場合はこのルームがランキングを取得するブロックが違う可能性がある。この方法でいいのか？
-	roomlistinf, err := srapi.GetRoominfFromEventByApi(client, event.Ieventid, 1, 1)
+	/*
+		roomlistinf, err := srapi.GetRoominfFromEventByApi(client, event.Ieventid, 1, 1)
+		if err != nil {
+			err = fmt.Errorf("GetRoominfFromEventByApi(): %w", err)
+			return
+		}
+	*/
+	roomlistinf, err := srapi.GetEventRankingByApi(client, eid, 1, 1)
 	if err != nil {
 		err = fmt.Errorf("GetRoominfFromEventByApi(): %w", err)
 		return
 	}
-	if len(roomlistinf.RoomList) == 0 {
+	// if len(roomlistinf.RoomList) == 0 {
+	if len(roomlistinf.Ranking) == 0 {
 		//  エントリーしているルームが一つもない。
 		err = fmt.Errorf("GetRoominfFromEventByApi(): %s has no room", event.Eventid)
 		return
 	}
 
-	roomid := roomlistinf.RoomList[0].Room_id
+	roomid := roomlistinf.Ranking[0].RoomID
 
 	// イベント結果を取得する
 	bid := 0

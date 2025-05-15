@@ -62,9 +62,10 @@ import (
 01AY00  使用しているパッケージをすえてv2に変更する。
 01AZ00  ExtractStructColumns()を作成する。EventR型を作成する。
 01BA00  UpinsUser()のinsertとupdateでirankなどが設定されていない不具合を修正する。ExtractStructColumns()がタグなしでも動作するようにする。
+01BB00  GetRoominfFromEventByAp() を GetEventRankingByApi()に差し替える
 */
 
-const Version = "01BA00"
+const Version = "01BB00"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
@@ -74,8 +75,8 @@ type Environment struct {
 
 var Env Environment = Environment{
 	//	Intervalhour: 6,     //	6時間以内にデータがあれば重複チェックを行う？
-	Lmin: 14400, //	viewer, user で前回更新から10日間以上経っていれば更新する(UpdateUserSetPropertyのようにこの値を使わない場合もある)
-	Waitmsec: 100, //	viewer, user で新しいデータをinsertしてから1秒間待つ(APIにアクセス制限があるように思えるため)
+	Lmin:     14400, //	viewer, user で前回更新から10日間以上経っていれば更新する(UpdateUserSetPropertyのようにこの値を使わない場合もある)
+	Waitmsec: 100,   //	viewer, user で新しいデータをinsertしてから1秒間待つ(APIにアクセス制限があるように思えるため)
 }
 
 var AllColumns map[string]string
@@ -166,41 +167,41 @@ var Colorlist1 []Color = []Color{
 }
 
 var Colorlist0 []Color = []Color{
-			{"#00FFFF", "#00FFFF"},
-			{"#FF00FF", "#FF00FF"},
-			{"#FFFF00", "#FFFF00"},
-			//      -----
-			{"#7F7FFF", "#7F7FFF"},
-			{"#FF7F7F", "#FF7F7F"},
-			{"#7FFF7F", "#7FFF7F"},
+	{"#00FFFF", "#00FFFF"},
+	{"#FF00FF", "#FF00FF"},
+	{"#FFFF00", "#FFFF00"},
+	//      -----
+	{"#7F7FFF", "#7F7FFF"},
+	{"#FF7F7F", "#FF7F7F"},
+	{"#7FFF7F", "#7FFF7F"},
 
-			{"#7FBFFF", "#7FBFFF"},
-			{"#FF7FBF", "#FF7FBF"},
-			{"#BFFF7F", "#BFFF7F"},
+	{"#7FBFFF", "#7FBFFF"},
+	{"#FF7FBF", "#FF7FBF"},
+	{"#BFFF7F", "#BFFF7F"},
 
-			{"#7FFFFF", "#7FFFFF"},
-			{"#FF7FFF", "#FF7FFF"},
-			{"#FFFF7F", "#FFFF7F"},
+	{"#7FFFFF", "#7FFFFF"},
+	{"#FF7FFF", "#FF7FFF"},
+	{"#FFFF7F", "#FFFF7F"},
 
-			{"#7FFFBF", "#7FFFBF"},
-			{"#BF7FFF", "#BF7FFF"},
-			{"#FFBF7F", "#FFBF7F"},
-			//      -----
-			{"#ADADFF", "#ADADFF"},
-			{"#FFADAD", "#FFADAD"},
-			{"#ADFFAD", "#7FFFAD"},
+	{"#7FFFBF", "#7FFFBF"},
+	{"#BF7FFF", "#BF7FFF"},
+	{"#FFBF7F", "#FFBF7F"},
+	//      -----
+	{"#ADADFF", "#ADADFF"},
+	{"#FFADAD", "#FFADAD"},
+	{"#ADFFAD", "#7FFFAD"},
 
-			{"#ADD6FF", "#ADD6FF"},
-			{"#FFADD6", "#FFADD6"},
-			{"#D6FFAD", "#D6FFAD"},
+	{"#ADD6FF", "#ADD6FF"},
+	{"#FFADD6", "#FFADD6"},
+	{"#D6FFAD", "#D6FFAD"},
 
-			{"#ADFFFF", "#ADFFFF"},
-			{"#FFADFF", "#FFADFF"},
-			{"#FFFFAD", "#FFFFAD"},
+	{"#ADFFFF", "#ADFFFF"},
+	{"#FFADFF", "#FFADFF"},
+	{"#FFFFAD", "#FFFFAD"},
 
-			{"#ADFFD6", "#ADFFD6"},
-			{"#D6ADFF", "#D6ADFF"},
-			{"#FFD6AD", "#FFD6AD"},
+	{"#ADFFD6", "#ADFFD6"},
+	{"#D6ADFF", "#D6ADFF"},
+	{"#FFD6AD", "#FFD6AD"},
 }
 
 type ColorInf struct {
