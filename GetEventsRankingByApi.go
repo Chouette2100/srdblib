@@ -72,8 +72,18 @@ func GetEventsRankingByApi(
 	// if len(roomlistinf.RoomList) == 0 {
 	if len(roomlistinf.Ranking) == 0 {
 		//  エントリーしているルームが一つもない。
-		err = fmt.Errorf("GetRoominfFromEventByApi(): %s has no room", event.Eventid)
-		return
+		var intf []interface{}
+		intf, err = Dbmap.Select(Eventuser{}, "select userno from eventuser where eventid=?", eid)
+		if err != nil {
+			err = fmt.Errorf("Dbmap.Select(): %w", err)
+			return
+		}
+		if len(intf) == 0 {
+			err = fmt.Errorf("GetRoominfFromEventByApi(): %s has no room", event.Eventid)
+			return
+		}
+		roomlistinf.Ranking = make([]srapi.Ranking, 1)
+		roomlistinf.Ranking[0].RoomID = intf[0].(*Eventuser).Userno
 	}
 
 	roomid := roomlistinf.Ranking[0].RoomID
