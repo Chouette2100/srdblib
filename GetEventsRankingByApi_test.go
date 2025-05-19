@@ -73,47 +73,57 @@ func TestGetEventsRankingByApi(t *testing.T) {
 		wantPranking *srapi.Eventranking
 		wantErr      bool
 	}{
+		{
+			name: "tifdedebut2025_y?block_id=37020",
+			args: args{
+				client: client,
+				eid:    "tifdedebut2025_y?block_id=37020",
+				mode:   1, //	1: イベント開催中, 2: イベント終了後
+			},
+			wantPranking: nil,
+			wantErr:      false,
+		},
 		// TODO: Add test cases.
-		{
-			name: "tifdedebut2025_s?block_id=36610",
-			args: args{
-				client: client,
-				eid:    "tifdedebut2025_s?block_id=36610",
-				mode:   1, //	1: イベント開催中, 2: イベント終了後
-			},
-			wantPranking: nil,
-			wantErr:      false,
-		},
-		{
-			name: "mattari_fireworks189",
-			args: args{
-				client: client,
-				eid:    "mattari_fireworks189",
-				mode:   1, //	1: イベント開催中, 2: イベント終了後
-			},
-			wantPranking: nil,
-			wantErr:      false,
-		},
 		/*
 			{
-				name: "test_20901",
+				name: "tifdedebut2025_s?block_id=36610",
 				args: args{
 					client: client,
-					eid:    "safaripark_showroom?block_id=20901",
-					mode:	1,	//	1: イベント開催中, 2: イベント終了後
+					eid:    "tifdedebut2025_s?block_id=36610",
+					mode:   1, //	1: イベント開催中, 2: イベント終了後
 				},
 				wantPranking: nil,
 				wantErr:      false,
 			},
 			{
-				name: "test_0",
+				name: "mattari_fireworks189",
 				args: args{
 					client: client,
-					eid:    "safaripark_showroom?block_id=0",
+					eid:    "mattari_fireworks189",
+					mode:   1, //	1: イベント開催中, 2: イベント終了後
 				},
 				wantPranking: nil,
 				wantErr:      false,
 			},
+				{
+					name: "test_20901",
+					args: args{
+						client: client,
+						eid:    "safaripark_showroom?block_id=20901",
+						mode:	1,	//	1: イベント開催中, 2: イベント終了後
+					},
+					wantPranking: nil,
+					wantErr:      false,
+				},
+				{
+					name: "test_0",
+					args: args{
+						client: client,
+						eid:    "safaripark_showroom?block_id=0",
+					},
+					wantPranking: nil,
+					wantErr:      false,
+				},
 		*/
 	}
 	for _, tt := range tests {

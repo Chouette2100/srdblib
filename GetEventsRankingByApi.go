@@ -64,29 +64,40 @@ func GetEventsRankingByApi(
 			return
 		}
 	*/
-	roomlistinf, err := srapi.GetEventRankingByApi(client, eid, 1, 1)
-	if err != nil {
-		err = fmt.Errorf("GetRoominfFromEventByApi(): %w", err)
-		return
-	}
-	// if len(roomlistinf.RoomList) == 0 {
-	if len(roomlistinf.Ranking) == 0 {
-		//  エントリーしているルームが一つもない。
-		var intf []interface{}
-		intf, err = Dbmap.Select(Eventuser{}, "select userno from eventuser where eventid=?", eid)
+	var roomlistinf *srapi.EventRanking
+	var roomid int
+	eida := strings.Split(event.Eventid, "=")
+	if len(eida) == 1 {
+		// 通常のイベント
+		roomlistinf, err = srapi.GetEventRankingByApi(client, eid, 1, 1)
 		if err != nil {
-			err = fmt.Errorf("Dbmap.Select(): %w", err)
+			err = fmt.Errorf("GetRoominfFromEventByApi(): %w", err)
 			return
 		}
-		if len(intf) == 0 {
-			err = fmt.Errorf("GetRoominfFromEventByApi(): %s has no room", event.Eventid)
-			return
+		// if len(roomlistinf.RoomList) == 0 {
+		if len(roomlistinf.Ranking) == 0 {
+			//  エントリーしているルームが一つもない。
+			var intf []interface{}
+			intf, err = Dbmap.Select(Eventuser{}, "select userno from eventuser where eventid=?", eid)
+			if err != nil {
+				err = fmt.Errorf("Dbmap.Select(): %w", err)
+				return
+			}
+			if len(intf) == 0 {
+				err = fmt.Errorf("GetRoominfFromEventByApi(): %s has no room", event.Eventid)
+				return
+			}
+			roomlistinf.Ranking = make([]srapi.Ranking, 1)
+			roomlistinf.Ranking[0].RoomID = intf[0].(*Eventuser).Userno
 		}
-		roomlistinf.Ranking = make([]srapi.Ranking, 1)
-		roomlistinf.Ranking[0].RoomID = intf[0].(*Eventuser).Userno
+		roomid = roomlistinf.Ranking[0].RoomID
+	} else {
+		// ブロックイベント
+		bid, _ := strconv.Atoi(eida[1])
+		var ebr *srapi.EventBlockRanking
+		ebr, err = srapi.GetEventBlockRanking(client, event.Ieventid, bid, 1, 1)
+		roomid, _ = strconv.Atoi(ebr.Block_ranking_list[0].Room_id)
 	}
-
-	roomid := roomlistinf.Ranking[0].RoomID
 
 	// イベント結果を取得する
 	bid := 0

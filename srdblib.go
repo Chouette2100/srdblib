@@ -64,10 +64,11 @@ import (
 01BA00  UpinsUser()のinsertとupdateでirankなどが設定されていない不具合を修正する。ExtractStructColumns()がタグなしでも動作するようにする。
 01BB00  GetRoominfFromEventByAp() を GetEventRankingByApi()に差し替える
 01BC00  GetEventsRankingByApi()のブロックイベント対応を行う
+01BD00  GetEventsRankingByApi()のブロックイベント対応を行う
 
 */
 
-const Version = "01BC00"
+const Version = "01BD00"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
