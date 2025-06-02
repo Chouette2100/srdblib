@@ -4,7 +4,7 @@ go 1.24.2
 
 require (
 	github.com/Chouette2100/exsrapi/v2 v2.3.1
-	github.com/Chouette2100/srapi/v2 v2.3.1
+	github.com/Chouette2100/srapi/v2 v2.3.2
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-gorp/gorp v2.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.9.2

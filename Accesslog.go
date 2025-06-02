@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-//	アクセスログ accesslog 2024-11-27 〜
+// アクセスログ accesslog 2024-11-27 〜
 type Accesslog struct {
 	Handler       string
 	Remoteaddress string
@@ -31,8 +31,12 @@ func GetFeaturedEvents(
 
 	eventmap = make(map[string]int)
 
-	sqlst := "select eventid, count(*) ct from accesslog where ts > SUBDATE(now(),INTERVAL ? hour) AND is_bot = 0 "
-	sqlst += " group by eventid order by ct desc limit ? "
+	// sqlst := "select eventid, count(*) ct from accesslog where ts > SUBDATE(now(),INTERVAL ? hour) AND is_bot = 0 "
+	// sqlst += " group by eventid order by ct desc limit ? "
+
+	sqlst := "select a.eventid, count(*) ct from accesslog a join event e on e.eventid = BINARY a.eventid "
+	sqlst += " where a.ts > SUBDATE(now(),INTERVAL ? hour) AND a.is_bot = 0 and e.endtime > Now() "
+	sqlst += " group by a.eventid order by ct desc limit ? "
 
 	type event struct {
 		Eventid string

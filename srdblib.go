@@ -65,10 +65,11 @@ import (
 01BB00  GetRoominfFromEventByAp() を GetEventRankingByApi()に差し替える
 01BC00  GetEventsRankingByApi()のブロックイベント対応を行う
 01BD00  GetEventsRankingByApi()のブロックイベント対応を行う
+01BE00  GetFeaturedEvents()でイベントの終了時間を考慮するようにする。
 
 */
 
-const Version = "01BD00"
+const Version = "01BE00"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
