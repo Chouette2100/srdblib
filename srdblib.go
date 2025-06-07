@@ -66,10 +66,11 @@ import (
 01BC00  GetEventsRankingByApi()のブロックイベント対応を行う
 01BD00  GetEventsRankingByApi()のブロックイベント対応を行う
 01BE00  GetFeaturedEvents()でイベントの終了時間を考慮するようにする。
+01BF00  Eventrankを導入する
 
 */
 
-const Version = "01BE00"
+const Version = "01BF00"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
