@@ -22,35 +22,35 @@ func SelectCurEventList() (
 	sqls := "select e.eventid, e.event_name, e.period, e.starttime, e.endtime, e.fromorder, e.toorder "
 	sqls += "from event e join wevent we on e.eventid = we.eventid "
 	sqls += " where e.endtime > now() and e.starttime < now()  and we.achk = 0"
-	stmt, Dberr = Db.Prepare(sqls)
-	if Dberr != nil {
-		log.Printf("err=[%s]\n", Dberr.Error())
-		err = fmt.Errorf("Db.Prepare(sqls): %w", Dberr)
+	stmt, err = Db.Prepare(sqls)
+	if err != nil {
+		log.Printf("err=[%s]\n", err.Error())
+		err = fmt.Errorf("Db.Prepare(sqls): %w", err)
 		return
 	}
 	defer stmt.Close()
 
-	rows, Dberr = stmt.Query()
-	if Dberr != nil {
-		log.Printf("err=[%s]\n", Dberr.Error())
-		err = fmt.Errorf("stmt.Query(): %w", Dberr)
+	rows, err = stmt.Query()
+	if err != nil {
+		log.Printf("err=[%s]\n", err.Error())
+		err = fmt.Errorf("stmt.Query(): %w", err)
 		return
 	}
 	defer rows.Close()
 
 	var event exsrapi.Event_Inf
 	for rows.Next() {
-		Dberr = rows.Scan(&event.Event_ID, &event.Event_name, &event.Period, &event.Start_time, &event.End_time, &event.Fromorder, &event.Toorder)
-		if Dberr != nil {
-			log.Printf("err=[%s]\n", Dberr.Error())
-			err = fmt.Errorf("rows.Next(): %w", Dberr)
+		err = rows.Scan(&event.Event_ID, &event.Event_name, &event.Period, &event.Start_time, &event.End_time, &event.Fromorder, &event.Toorder)
+		if err != nil {
+			log.Printf("err=[%s]\n", err.Error())
+			err = fmt.Errorf("rows.Next(): %w", err)
 			return
 		}
 		eventlist = append(eventlist, event)
 	}
-	if Dberr = rows.Err(); Dberr != nil {
-		log.Printf("err=[%s]\n", Dberr.Error())
-		err = fmt.Errorf("rows.Err(): %w", Dberr)
+	if err = rows.Err(); err != nil {
+		log.Printf("err=[%s]\n", err.Error())
+		err = fmt.Errorf("rows.Err(): %w", err)
 		return
 	}
 

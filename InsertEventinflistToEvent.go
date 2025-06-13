@@ -1,4 +1,5 @@
-/*!
+/*
+!
 Copyright © 2023 chouette.21.00@gmail.com
 Released under the MIT license
 https://opensource.org/licenses/mit-license.php
@@ -23,7 +24,7 @@ import (
 処理の状況を示すために使われる。
 */
 func InsertEventinflistToEvent(
-	tevent	string,	//	insertするテーブル
+	tevent string, //	insertするテーブル
 	eventinflist *[]exsrapi.Event_Inf, //	イベント情報リスト
 	bcheck bool, //	true:	キーが同一のレコードの存在チェックを行う
 ) (
@@ -37,9 +38,9 @@ func InsertEventinflistToEvent(
 	sql += " fromorder, toorder, resethh, resetmm, nobasis, maxdsp, cmap, target, rstatus, maxpoint, achk" //, aclr	未使用
 	sql += ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 	//	log.Printf("db.Prepare(sql)\n")
-	stmt, Dberr = Db.Prepare(sql)
-	if Dberr != nil {
-		err = fmt.Errorf("row.Exec(): %w", Dberr)
+	stmt, err = Db.Prepare(sql)
+	if err != nil {
+		err = fmt.Errorf("row.Exec(): %w", err)
 		return
 	}
 	defer stmt.Close()
@@ -48,15 +49,15 @@ func InsertEventinflistToEvent(
 		//	存在確認
 		nrow := 0
 		if bcheck {
-			if Dberr := Db.QueryRow("select count(*) from "+tevent+" where eventid = ?", eventinf.Event_ID).Scan(&nrow); Dberr != nil {
-				err = fmt.Errorf("QeryRow().Scan(): %w", Dberr)
+			if err = Db.QueryRow("select count(*) from "+tevent+" where eventid = ?", eventinf.Event_ID).Scan(&nrow); err != nil {
+				err = fmt.Errorf("QeryRow().Scan(): %w", err)
 				return
 			}
 		}
 
 		if bcheck && nrow == 0 || !bcheck && eventinf.Valid {
 			//	同一のeventidのデータが存在しないのでデータを格納する。
-			_, Dberr = stmt.Exec(
+			_, err = stmt.Exec(
 				eventinf.Event_ID,
 				eventinf.I_Event_ID,
 				eventinf.Event_name,
@@ -80,8 +81,8 @@ func InsertEventinflistToEvent(
 				eventinf.Achk,
 			)
 
-			if Dberr != nil {
-				err = fmt.Errorf("row.Exec(): %w", Dberr)
+			if err != nil {
+				err = fmt.Errorf("row.Exec(): %w", err)
 				return
 			}
 			log.Printf("  **Inserted: %-30s %s\n", eventinf.Event_ID, eventinf.Event_name)

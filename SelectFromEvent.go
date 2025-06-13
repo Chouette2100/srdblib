@@ -22,7 +22,7 @@ func SelectFromEvent(
 	sql := "select eventid,ieventid,event_name, period, starttime, endtime, noentry, intervalmin, modmin, modsec, "
 	sql += " Fromorder, Toorder, Resethh, Resetmm, Nobasis, Maxdsp, cmap, target, `rstatus`, maxpoint, thinit, thdelta "
 	sql += " from " + tevent + " where eventid = ?"
-	Dberr = Db.QueryRow(sql, eventid).Scan(
+	err = Db.QueryRow(sql, eventid).Scan(
 		&eventinf.Event_ID,
 		&eventinf.I_Event_ID,
 		&eventinf.Event_name,
@@ -47,12 +47,12 @@ func SelectFromEvent(
 		&eventinf.Thdelta,
 	)
 
-	if Dberr != nil {
-		if Dberr.Error() != "sql: no rows in result set" {
+	if err != nil {
+		if err.Error() != "sql: no rows in result set" {
 			peventinf = nil
 			return
 		} else {
-			err = fmt.Errorf("row.Exec(): %w", Dberr)
+			err = fmt.Errorf("row.Exec(): %w", err)
 			log.Printf("%s\n", sql)
 			log.Printf("err=[%v]\n", err)
 			return

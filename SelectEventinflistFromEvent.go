@@ -55,9 +55,9 @@ func SelectEventinflistFromEvent(
 
 	//	log.Printf("sql=[%s]\n", sqls)
 	var stmts *sql.Stmt
-	stmts, Dberr = Db.Prepare(sqls)
-	if Dberr != nil {
-		err = fmt.Errorf("Prepare(sqls): %w", Dberr)
+	stmts, err = Db.Prepare(sqls)
+	if err != nil {
+		err = fmt.Errorf("Prepare(sqls): %w", err)
 		return
 	}
 	defer stmts.Close()
@@ -66,20 +66,20 @@ func SelectEventinflistFromEvent(
 
 	switch {
 	case cond == 99 && keyword == "":
-		rows, Dberr = stmts.Query()
+		rows, err = stmts.Query()
 	case cond == 99 && keyword != "":
-		rows, Dberr = stmts.Query("%"+keyword+"%")
+		rows, err = stmts.Query("%" + keyword + "%")
 	case cond == 0 && keyword == "":
-		rows, Dberr = stmts.Query(tnow, tnow)
+		rows, err = stmts.Query(tnow, tnow)
 	case cond == 0 && keyword != "":
-		rows, Dberr = stmts.Query(tnow, tnow, "%"+keyword+"%")
+		rows, err = stmts.Query(tnow, tnow, "%"+keyword+"%")
 	case cond != 0 && keyword == "":
-		rows, Dberr = stmts.Query(tnow)
+		rows, err = stmts.Query(tnow)
 	case cond != 0 && keyword != "":
-		rows, Dberr = stmts.Query(tnow, "%"+keyword+"%")
+		rows, err = stmts.Query(tnow, "%"+keyword+"%")
 	}
-	if Dberr != nil {
-		err = fmt.Errorf("Query(tnow): %w", Dberr)
+	if err != nil {
+		err = fmt.Errorf("Query(tnow): %w", err)
 		return
 	}
 	defer rows.Close()
@@ -89,7 +89,7 @@ func SelectEventinflistFromEvent(
 
 	for rows.Next() {
 
-		Dberr = rows.Scan(
+		err = rows.Scan(
 			&eventinf.Event_ID,
 			&eventinf.I_Event_ID,
 			&eventinf.Event_name,
@@ -113,11 +113,11 @@ func SelectEventinflistFromEvent(
 			&eventinf.Achk,
 		)
 
-		if Dberr != nil {
-			if Dberr.Error() != "sql: no rows in result set" {
+		if err != nil {
+			if err.Error() != "sql: no rows in result set" {
 				return
 			} else {
-				err = fmt.Errorf("row.Exec(): %w", Dberr)
+				err = fmt.Errorf("row.Exec(): %w", err)
 				return
 			}
 		}

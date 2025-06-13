@@ -48,15 +48,14 @@ type DBConfig struct {
 }
 
 var Dialer sshql.Dialer
-var Db *sql.DB  //  プログラム中では一貫してこの変数を使うこと
-var Dberr error //  プログラム中では一貫してこの変数を使うこと
+var Db *sql.DB //  プログラム中では一貫してこの変数を使うこと
+// var Dberr error
 var Dbmap *gorp.DbMap
 
 //	var Tevent = "event"
 //	var Teventuser = "eventuser"
 //	var Tuser = "user"
 //	var Tuserhistory = "userhistory"
-
 
 func OpenDb(filenameofdbconfig string) (dbconfig *DBConfig, err error) {
 
@@ -91,9 +90,9 @@ func OpenDb(filenameofdbconfig string) (dbconfig *DBConfig, err error) {
 		cnc = "@ssh+tcp"
 	}
 	cnc += "(" + dbconfig.DBhost + ":" + dbconfig.DBport + ")"
-	Db, Dberr = sql.Open("mysql", dbconfig.DBuser+":"+dbconfig.DBpswd+cnc+"/"+dbconfig.DBname+"?parseTime=true&loc=Asia%2FTokyo")
-	if Dberr != nil {
-		err = fmt.Errorf("sql.Open(): %w", Dberr)
+	Db, err = sql.Open("mysql", dbconfig.DBuser+":"+dbconfig.DBpswd+cnc+"/"+dbconfig.DBname+"?parseTime=true&loc=Asia%2FTokyo")
+	if err != nil {
+		err = fmt.Errorf("sql.Open(): %w", err)
 	}
 
 	return

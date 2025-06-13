@@ -74,11 +74,11 @@ func InsertNewOnes(
 
 	nrow := 0
 	sqls := "select count(*) from eventuser where userno =? and eventid = ?"
-	Dberr = Db.QueryRow(sqls, room.Room_id, eventid).Scan(&nrow)
+	err = Db.QueryRow(sqls, room.Room_id, eventid).Scan(&nrow)
 
-	if Dberr != nil {
-		log.Printf("select count(*) from user ... err=[%s]\n", Dberr.Error())
-		err = fmt.Errorf("Db.QueryRow().Scan(&nrow): %w", Dberr)
+	if err != nil {
+		log.Printf("select count(*) from user ... err=[%s]\n", err.Error())
+		err = fmt.Errorf("Db.QueryRow().Scan(&nrow): %w", err)
 		return
 	}
 
@@ -92,15 +92,15 @@ func InsertNewOnes(
 		//	log.Printf("  =====Insert into eventuser userno=%d, eventid=%s\n", userno, eventid)
 		var stmt *sql.Stmt
 		sqli := "INSERT INTO eventuser(eventid, userno, istarget, graph, color, iscntrbpoints, point) VALUES(?,?,?,?,?,?,?)"
-		stmt, Dberr = Db.Prepare(sqli)
-		if Dberr != nil {
-			err = fmt.Errorf("Db.Prepare(sqli): %w", Dberr)
+		stmt, err = Db.Prepare(sqli)
+		if err != nil {
+			err = fmt.Errorf("Db.Prepare(sqli): %w", err)
 			return
 		}
 		defer stmt.Close()
 
 		//	if i < 10 {
-		_, Dberr = stmt.Exec(
+		_, err = stmt.Exec(
 			eventid,
 			userno,
 			"Y",
@@ -110,15 +110,15 @@ func InsertNewOnes(
 			room.Point,
 		)
 
-		if Dberr != nil {
-			log.Printf("error(InsertIntoOrUpdateUser() INSERT/Exec) err=%s\n", Dberr.Error())
-			err = fmt.Errorf("stmt.Exec(stmt): %w", Dberr)
+		if err != nil {
+			log.Printf("error(InsertIntoOrUpdateUser() INSERT/Exec) err=%s\n", err.Error())
+			err = fmt.Errorf("stmt.Exec(stmt): %w", err)
 			return
 		}
 		log.Printf("   **** insert into eventuser.\n")
 
 		sqlip := "insert into points (ts, user_id, eventid, point, `rank`, gap, pstatus) values(?,?,?,?,?,?,?)"
-		_, Dberr = Db.Exec(
+		_, err = Db.Exec(
 			sqlip,
 			eventinf.Start_time.Truncate(time.Second),
 			userno,
@@ -128,8 +128,8 @@ func InsertNewOnes(
 			0,
 			"=",
 		)
-		if Dberr != nil {
-			err = fmt.Errorf("Db.Exec(sqlip,...): %w", Dberr)
+		if err != nil {
+			err = fmt.Errorf("Db.Exec(sqlip,...): %w", err)
 			return
 		}
 		log.Printf("   **** insert into points.\n")
@@ -137,9 +137,9 @@ func InsertNewOnes(
 		nrowu := 0
 		/*
 			sqlscu := "select count(*) from user where userno =?"
-			Dberr = Db.QueryRow(sqlscu, userno).Scan(&nrowu)
-			if Dberr != nil {
-				err = fmt.Errorf("Db.QueryRow(sqlscu, userno).Scan(&nrow): %w", Dberr)
+			err = Db.QueryRow(sqlscu, userno).Scan(&nrowu)
+			if err != nil {
+				err = fmt.Errorf("Db.QueryRow(sqlscu, userno).Scan(&nrow): %w", err)
 				return
 			}
 		*/
@@ -160,7 +160,7 @@ func InsertNewOnes(
 				shortname := fmt.Sprintf("%d", userno)
 				shortname = shortname[len(shortname)-2:]
 				sqliu := "insert into user (userno, userid, user_name, longname, shortname, currentevent, ts) values(?,?,?,?,?,?,?)"
-				_, Dberr = Db.Exec(
+				_, err = Db.Exec(
 					sqliu,
 					userno,
 					room.Room_url_key,
@@ -170,8 +170,8 @@ func InsertNewOnes(
 					eventid,
 					tnow,
 				)
-				if Dberr != nil {
-					err = fmt.Errorf("Db.Exec(sqliu,...): %w", Dberr)
+				if err != nil {
+					err = fmt.Errorf("Db.Exec(sqliu,...): %w", err)
 					return
 				}
 			*/
@@ -190,14 +190,14 @@ func InsertNewOnes(
 			log.Printf("   **** user already exists.\n")
 
 			/*
-			puser := row.(*User)
-			err = UpdateUserSetProperty(client, tnow, puser)
-			if err != nil {
-				err = fmt.Errorf("UpdateUserSetProperty(client, tnow, puser): %w", err)
-				return
-			}
+				puser := row.(*User)
+				err = UpdateUserSetProperty(client, tnow, puser)
+				if err != nil {
+					err = fmt.Errorf("UpdateUserSetProperty(client, tnow, puser): %w", err)
+					return
+				}
 
-			log.Printf("   **** update user.\n")
+				log.Printf("   **** update user.\n")
 			*/
 		}
 
@@ -230,11 +230,11 @@ func InsertNewOnes(
 			stmtuu, err = Db.Prepare(sqluu)
 			if err != nil {
 				log.Printf("error(UPDATE/Prepare) err=%s\n", err.Error())
-				err = fmt.Errorf("Db.Prepare(sqluu): %w", Dberr)
+				err = fmt.Errorf("Db.Prepare(sqluu): %w", err)
 				return
 			}
 			defer stmtuu.Close()
-			_, Dberr = stmtuu.Exec(
+			_, err = stmtuu.Exec(
 				roominf.Account,
 				roominf.Name,
 				roominf.Genre,
@@ -249,9 +249,9 @@ func InsertNewOnes(
 				tnow,
 				userno,
 			)
-			if Dberr != nil {
-				log.Printf("error(InsertIntoOrUpdateUser() UPDATE/Exec) err=%s\n", Dberr.Error())
-				err = fmt.Errorf("stmtuu.Exec(): %w", Dberr)
+			if err != nil {
+				log.Printf("error(InsertIntoOrUpdateUser() UPDATE/Exec) err=%s\n", err.Error())
+				err = fmt.Errorf("stmtuu.Exec(): %w", err)
 				return
 			}
 			log.Printf("   **** update user.\n")
@@ -265,20 +265,20 @@ func InsertNewOnes(
 		stmtu, err = Db.Prepare(sqlu)
 		if err != nil {
 			log.Printf("error(UPDATE/Prepare) err=%s\n", err.Error())
-			err = fmt.Errorf("Db.Prepare(sqlu): %w", Dberr)
+			err = fmt.Errorf("Db.Prepare(sqlu): %w", err)
 			return
 		}
 		defer stmtu.Close()
 
-		_, Dberr = stmtu.Exec(
+		_, err = stmtu.Exec(
 			"Y",
 			eventid,
 			userno,
 		)
 
-		if Dberr != nil {
-			log.Printf("error(Update eventuser) err=%s\n", Dberr.Error())
-			err = fmt.Errorf("stmtu.Exec(): %w", Dberr)
+		if err != nil {
+			log.Printf("error(Update eventuser) err=%s\n", err.Error())
+			err = fmt.Errorf("stmtu.Exec(): %w", err)
 			return
 		}
 		log.Printf("   **** update eventuser.\n")
