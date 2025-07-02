@@ -68,10 +68,11 @@ import (
 01BE00  GetFeaturedEvents()でイベントの終了時間を考慮するようにする。
 01BF00  Eventrankを導入する
 01BF01  Dberrの使用をやめerrに統一する。
+01BG00  GetFeaturedEvents()の引数をmode, hours, num, lmctに変更する(使用しているのはSRCGIのみなのでメジャーバージョンアップとしない)
 
 */
 
-const Version = "01BF01"
+const Version = "01BG00"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

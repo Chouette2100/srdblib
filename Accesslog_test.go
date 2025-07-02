@@ -17,6 +17,7 @@ import (
 
 func TestGetFeaturedEvents(t *testing.T) {
 	type args struct {
+		mode  string // "current" or "closed"
 		hours int
 		num   int
 		lmct  int
@@ -27,11 +28,36 @@ func TestGetFeaturedEvents(t *testing.T) {
 		wantEvents map[string]bool
 	}{
 		{
-			name: "SelectFromEvent_test",
+			name: "current",
 			args: args{
-				hours: 24,
+				mode:  "current",
+				hours: 48,
 				num:   18,
-				lmct:  10,
+				lmct:  16,
+			},
+			wantEvents: map[string]bool{
+				"SelectFromEvent_test": true,
+			},
+		},
+		{
+			name: "closed",
+			args: args{
+				mode:  "closed",
+				hours: 72,
+				num:   24,
+				lmct:  8,
+			},
+			wantEvents: map[string]bool{
+				"SelectFromEvent_test": true,
+			},
+		},
+		{
+			name: "scheduled",
+			args: args{
+				mode:  "scheduled",
+				hours: 72,
+				num:   24,
+				lmct:  8,
 			},
 			wantEvents: map[string]bool{
 				"SelectFromEvent_test": true,
@@ -65,7 +91,7 @@ func TestGetFeaturedEvents(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotEvents := GetFeaturedEvents(tt.args.hours, tt.args.num, tt.args.lmct); !reflect.DeepEqual(gotEvents, tt.wantEvents) {
+			if gotEvents, _ := GetFeaturedEvents(tt.args.mode, tt.args.hours, tt.args.num, tt.args.lmct); !reflect.DeepEqual(gotEvents, tt.wantEvents) {
 				t.Errorf("GetFeaturedEvents() = %v, want %v", gotEvents, tt.wantEvents)
 			} else {
 				t.Logf("GetFeaturedEvents() = %v, want %v", gotEvents, tt.wantEvents)

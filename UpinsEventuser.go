@@ -56,9 +56,10 @@ func UpinsEventuser(
 	}
 
 	colorlist := Colorlist2
-	if cmap == 1 {
+	switch cmap {
+	case 1:
 		colorlist = Colorlist1
-	} else if cmap == 0 {
+	case 0:
 		colorlist = Colorlist0
 	}
 
