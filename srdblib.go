@@ -69,10 +69,10 @@ import (
 01BF00  Eventrankを導入する
 01BF01  Dberrの使用をやめerrに統一する。
 01BG00  GetFeaturedEvents()の引数をmode, hours, num, lmctに変更する(使用しているのはSRCGIのみなのでメジャーバージョンアップとしない)
-
+01BG01  TestExtractStructColumns()を作成し、TestExtractStructColumnsのテストを行う。
 */
 
-const Version = "01BG00"
+const Version = "01BG01"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
