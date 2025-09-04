@@ -43,7 +43,7 @@ func collectColumns(t reflect.Type, columns *[]string) {
 				columnName = strings.ToLower(field.Name)
 			}
 			if columnName != "" {
-				*columns = append(*columns, columnName)
+				*columns = append(*columns, "`"+columnName+"`")
 			}
 		}
 	}
