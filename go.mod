@@ -1,4 +1,4 @@
-module srlib/srdblib
+module github.com/Chouette2100/srdblib/v2
 
 go 1.24.5
 
