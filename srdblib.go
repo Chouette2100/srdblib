@@ -71,9 +71,10 @@ import (
 01BG00  GetFeaturedEvents()の引数をmode, hours, num, lmctに変更する(使用しているのはSRCGIのみなのでメジャーバージョンアップとしない)
 01BG01  TestExtractStructColumns()を作成し、TestExtractStructColumnsのテストを行う。
 01BG02   TestExtractStructColumns()で作成するカラム名は"`"で囲むようにする。rankみたいなカラム名があったときの対策である。
+200400  EventにCmode, Emphasisを追加する。
 */
 
-const Version = "01BG02"
+const Version = "200400"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

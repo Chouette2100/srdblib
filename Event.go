@@ -4,9 +4,9 @@
 package srdblib
 
 import (
-	"time"
 	"fmt"
 	"github.com/jinzhu/copier"
+	"time"
 )
 
 //	Gorpのための構造体定義
@@ -16,37 +16,39 @@ import (
 // イベント構造体
 // PRIMARY KEY (eventid)
 type Event struct {
-	Eventid     string `yaml:"eventid"` // イベントID　（event_url_key）
-	Ieventid    int `yamal:"ieventid"`    //	イベントID　（整数）
-	Event_name  string `yaml:"event_name"`
-	Period      string `yaml:"period"`
+	Eventid     string    `yaml:"eventid"`   // イベントID　（event_url_key）
+	Ieventid    int       `yamal:"ieventid"` //	イベントID　（整数）
+	Event_name  string    `yaml:"event_name"`
+	Period      string    `yaml:"period"`
 	Starttime   time.Time `yaml:"starttime"` // イベント開始時刻
 	Endtime     time.Time `yaml:"endtime"`   // イベント終了時刻
-	Noentry     int `yaml:"noentry"`
-	Intervalmin int `yaml:"intervalmin"`
-	Modmin      int `yaml:"modmin"`
-	Modsec      int `yaml:"modsec"`
-	Fromorder   int `yaml:"fromorder"`
-	Toorder     int `yaml:"toorder"`
-	Resethh     int `yaml:"resethh"`
-	Resetmm     int `yaml:"resetmm"`
-	Nobasis     int `yaml:"nobasis"`
-	Maxdsp      int `yaml:"maxdsp"`
-	Cmap        int `yaml:"cmap"`
-	Target      int `yaml:"target"`
-	Rstatus     string `yaml:"rstatus"`
-	Maxpoint    int `yaml:"maxpoint"`
-	Thinit      int `yaml:"thinit"` //	獲得ポイントがThinit + Thdelta * int(time.Since(Starttime).Hours())を超えるルームのみデータ取得対象とする。
-	Thdelta     int `yaml:"thdelta"`
-	Achk        int `yaml:"achk"`
-	Aclr        int `yaml:"aclr"`
+	Noentry     int       `yaml:"noentry"`
+	Intervalmin int       `yaml:"intervalmin"`
+	Modmin      int       `yaml:"modmin"`
+	Modsec      int       `yaml:"modsec"`
+	Fromorder   int       `yaml:"fromorder"`
+	Toorder     int       `yaml:"toorder"`
+	Resethh     int       `yaml:"resethh"`
+	Resetmm     int       `yaml:"resetmm"`
+	Nobasis     int       `yaml:"nobasis"`
+	Maxdsp      int       `yaml:"maxdsp"`
+	Cmap        int       `yaml:"cmap"`
+	Target      int       `yaml:"target"`
+	Rstatus     string    `yaml:"rstatus"`
+	Maxpoint    int       `yaml:"maxpoint"`
+	Thinit      int       `yaml:"thinit"` //	獲得ポイントがThinit + Thdelta * int(time.Since(Starttime).Hours())を超えるルームのみデータ取得対象とする。
+	Thdelta     int       `yaml:"thdelta"`
+	Achk        int       `yaml:"achk"`
+	Aclr        int       `yaml:"aclr"`
+	Cmode       int       `yaml:"cmode"`           // Cmode & x01 == 1 : 無条件で貢献ポイントを取得する
+	Emphasis    int       `yaml:"emphasis" db:"-"` // Emphasis & x01 != x01 イベント一覧でアクセス数が多いイベントを強調表示する
 }
 
 type Wevent struct {
 	Event
 }
 
-type EventC struct  {
+type EventC struct {
 	Event
 }
 

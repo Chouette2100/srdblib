@@ -1,6 +1,6 @@
 module github.com/Chouette2100/srdblib/v2
 
-go 1.24.5
+go 1.25.1
 
 require (
 	github.com/Chouette2100/exsrapi/v2 v2.3.1
