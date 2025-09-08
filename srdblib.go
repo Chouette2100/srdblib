@@ -69,12 +69,13 @@ import (
 01BF00  Eventrankを導入する
 01BF01  Dberrの使用をやめerrに統一する。
 01BG00  GetFeaturedEvents()の引数をmode, hours, num, lmctに変更する(使用しているのはSRCGIのみなのでメジャーバージョンアップとしない)
-01BG01  TestExtractStructColumns()を作成し、TestExtractStructColumnsのテストを行う。
-01BG02   TestExtractStructColumns()で作成するカラム名は"`"で囲むようにする。rankみたいなカラム名があったときの対策である。
+01BG01  TestExtractStructColumns()を作成し、ExtractStructColumnsのテストを行う。
+01BG02  ExtractStructColumns()で作成するカラム名は"`"で囲むようにする。rankみたいなカラム名があったときの対策である。
 200400  EventにCmode, Emphasisを追加する。
+200401  ExtractStructColumns()ではカラム名としてdbタグを使うようにする。また当面2025-09-06以後に追加するフィールドは除外する。
 */
 
-const Version = "200400"
+const Version = "200401"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

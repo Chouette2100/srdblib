@@ -21,21 +21,21 @@ func TestExtractStructColumns(t *testing.T) {
 				Field1 string
 				Field2 int
 			}{"value1", 2}},
-			"field1, field2",
+			"`field1`, `field2`",
 		},
 		{ // 構造体
 			"test_case_2",
 			args{
 				model: Event{},
 			},
-			"eventid, ieventid, event_name, period, starttime, endtime, noentry, intervalmin, modmin, modsec, fromorder, toorder, resethh, resetmm, nobasis, maxdsp, cmap, target, rstatus, maxpoint, thinit, thdelta, achk, aclr",
+			"`eventid`, `ieventid`, `event_name`, `period`, `starttime`, `endtime`, `noentry`, `intervalmin`, `modmin`, `modsec`, `fromorder`, `toorder`, `resethh`, `resetmm`, `nobasis`, `maxdsp`, `cmap`, `target`, `rstatus`, `maxpoint`, `thinit`, `thdelta`, `achk`, `aclr`",
 		},
 		{ // (埋め込みフィールドがある)構造体のポインタ
 			"test_case_3",
 			args{
 				model: &Wevent{},
 			},
-			"eventid, ieventid, event_name, period, starttime, endtime, noentry, intervalmin, modmin, modsec, fromorder, toorder, resethh, resetmm, nobasis, maxdsp, cmap, target, rstatus, maxpoint, thinit, thdelta, achk, aclr",
+			"`eventid`, `ieventid`, `event_name`, `period`, `starttime`, `endtime`, `noentry`, `intervalmin`, `modmin`, `modsec`, `fromorder`, `toorder`, `resethh`, `resetmm`, `nobasis`, `maxdsp`, `cmap`, `target`, `rstatus`, `maxpoint`, `thinit`, `thdelta`, `achk`, `aclr`",
 		},
 	}
 	for _, tt := range tests {

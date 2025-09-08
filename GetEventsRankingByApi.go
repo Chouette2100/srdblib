@@ -95,7 +95,7 @@ func GetEventsRankingByApi(
 		// ブロックイベント
 		bid, _ := strconv.Atoi(eida[1])
 		var ebr *srapi.EventBlockRanking
-		ebr, err = srapi.GetEventBlockRanking(client, event.Ieventid, bid, 1, 1)
+		ebr, _ = srapi.GetEventBlockRanking(client, event.Ieventid, bid, 1, 1)
 		roomid, _ = strconv.Atoi(ebr.Block_ranking_list[0].Room_id)
 	}
 
