@@ -16,6 +16,7 @@ type Accesslog struct {
 	Handler       string
 	Remoteaddress string
 	Useragent     string
+	Referer       string
 	Formvalues    string
 	Eventid       string
 	Roomid        int
