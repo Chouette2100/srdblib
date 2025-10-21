@@ -75,9 +75,10 @@ import (
 200401  ExtractStructColumns()ではカラム名としてdbタグを使うようにする。また当面2025-09-06以後に追加するフィールドは除外する。
 200402  Clmlistを作るための機能をinit()とする（各モジュールで共通に使うため）
 200403  accesslogテーブルにrefererカラムを追加する。
+200404  Clmlistの内容を導入前の状態で固定する。
 */
 
-const Version = "200403"
+const Version = "200404"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
