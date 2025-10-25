@@ -76,9 +76,10 @@ import (
 200402  Clmlistを作るための機能をinit()とする（各モジュールで共通に使うため）
 200403  accesslogテーブルにrefererカラムを追加する。
 200404  Clmlistの内容を導入前の状態で固定する。
+200500  Todo.goを追加する。SRCGIのTodo機能で使用する。
 */
 
-const Version = "200404"
+const Version = "200500"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
