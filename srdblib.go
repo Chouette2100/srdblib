@@ -81,7 +81,7 @@ import (
 200502  accesslogテーブルにis_botカラムを追加する。
 */
 
-const Version = "200501"
+const Version = "200502"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
