@@ -21,6 +21,7 @@ type Accesslog struct {
 	Eventid       string
 	Roomid        int
 	Ts            time.Time
+	Requestid     string
 }
 
 // 参照回数の多いイベントを抽出する
