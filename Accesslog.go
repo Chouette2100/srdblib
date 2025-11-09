@@ -21,6 +21,7 @@ type Accesslog struct {
 	Eventid       string
 	Roomid        int
 	Ts            time.Time
+	Is_bot        int
 	Requestid     string
 }
 

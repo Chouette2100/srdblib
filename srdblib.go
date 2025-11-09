@@ -78,6 +78,7 @@ import (
 200404  Clmlistの内容を導入前の状態で固定する。
 200500  Todo.goを追加する。SRCGIのTodo機能で使用する。
 200501  accesslogテーブルにrequestidカラムを追加する。
+200502  accesslogテーブルにis_botカラムを追加する。
 */
 
 const Version = "200501"
