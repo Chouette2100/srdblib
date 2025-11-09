@@ -79,9 +79,10 @@ import (
 200500  Todo.goを追加する。SRCGIのTodo機能で使用する。
 200501  accesslogテーブルにrequestidカラムを追加する。
 200502  accesslogテーブルにis_botカラムを追加する。
+200503  accesslogテーブルにTurnstilestatuカラムを追加する。
 */
 
-const Version = "200502"
+const Version = "200503"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

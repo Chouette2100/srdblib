@@ -13,16 +13,17 @@ import (
 
 // アクセスログ accesslog 2024-11-27 〜
 type Accesslog struct {
-	Handler       string
-	Remoteaddress string
-	Useragent     string
-	Referer       string
-	Formvalues    string
-	Eventid       string
-	Roomid        int
-	Ts            time.Time
-	Is_bot        int
-	Requestid     string
+	Handler         string
+	Remoteaddress   string
+	Useragent       string
+	Referer         string
+	Formvalues      string
+	Eventid         string
+	Roomid          int
+	Ts              time.Time
+	Is_bot          int // 0: human, 1: bot
+	Turnstilestatus int // 0: success, 1: failed, 3: pending
+	Requestid       string
 }
 
 // 参照回数の多いイベントを抽出する
