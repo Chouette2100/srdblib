@@ -1,10 +1,10 @@
 module github.com/Chouette2100/srdblib/v2
 
-go 1.25.1
+go 1.25.4
 
 require (
-	github.com/Chouette2100/exsrapi/v2 v2.3.1
-	github.com/Chouette2100/srapi/v2 v2.3.4
+	github.com/Chouette2100/exsrapi/v2 v2.3.2
+	github.com/Chouette2100/srapi/v2 v2.3.7
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-gorp/gorp v2.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.9.3

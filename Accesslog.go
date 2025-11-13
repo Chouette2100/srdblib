@@ -15,6 +15,7 @@ import (
 type Accesslog struct {
 	Handler         string
 	Remoteaddress   string
+	Region          string
 	Useragent       string
 	Referer         string
 	Formvalues      string

@@ -80,9 +80,10 @@ import (
 200501  accesslogテーブルにrequestidカラムを追加する。
 200502  accesslogテーブルにis_botカラムを追加する。
 200503  accesslogテーブルにTurnstilestatuカラムを追加する。
+200504  accesslogテーブルにRegionカラムを追加する。
 */
 
-const Version = "200503"
+const Version = "200504"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
