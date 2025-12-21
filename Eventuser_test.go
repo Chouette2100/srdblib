@@ -1,7 +1,7 @@
 // Copyright © 2025 chouette2100@gmail.com
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
-package srdblib
+package srdblib_test
 
 import (
 	"log"
@@ -10,12 +10,13 @@ import (
 
 	"github.com/go-gorp/gorp"
 	// "github.com/chouette2100/srdblib"
+	"github.com/Chouette2100/srdblib/v2"
 )
 
 func TestUpinsEventuser(t *testing.T) {
 	type args struct {
 		tnow time.Time
-		weu  Weventuser
+		weu  srdblib.Weventuser
 	}
 
 	tests := []struct {
@@ -27,8 +28,8 @@ func TestUpinsEventuser(t *testing.T) {
 		{
 			name: "TestOfUpinsEventuser",
 			args: args{
-				weu: Weventuser{
-					EventuserBR: EventuserBR{
+				weu: srdblib.Weventuser{
+					EventuserBR: srdblib.EventuserBR{
 						Eventid: "mattari_fireworks215",
 						Userno:  455133,
 						Vld:     1,
@@ -42,34 +43,37 @@ func TestUpinsEventuser(t *testing.T) {
 		},
 	}
 	// データベース接続
-	dbconfig, err := OpenDb("DBConfig.yml")
+	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		log.Printf("Database error. err = %v\n", err)
 		return
 	}
 	if dbconfig.UseSSH {
-		defer Dialer.Close()
+		defer srdblib.Dialer.Close()
 	}
-	defer Db.Close()
+	defer srdblib.Db.Close()
 
 	dial := gorp.MySQLDialect{Engine: "InnoDB", Encoding: "utf8mb4"}
-	Dbmap = &gorp.DbMap{Db: Db,
+	srdblib.Dbmap = &gorp.DbMap{Db: srdblib.Db,
 		Dialect:         dial,
 		ExpandSliceArgs: true, //スライス引数展開オプションを有効化する
 	}
-	Dbmap.AddTableWithName(User{}, "user").SetKeys(false, "Userno")
-	Dbmap.AddTableWithName(Userhistory{}, "userhistory").SetKeys(false, "Userno", "Ts")
-	// srdblib.Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
-	// srdblib.Dbmap.AddTableWithName(TWuser{}, "wuser").SetKeys(false, "Userno")
-	Dbmap.AddTableWithName(Wuserhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
-	Dbmap.AddTableWithName(Event{}, "event").SetKeys(false, "Eventid")
-	Dbmap.AddTableWithName(Eventuser{}, "eventuser").SetKeys(false, "Eventid", "Userno")
-	Dbmap.AddTableWithName(Wevent{}, "wevent").SetKeys(false, "Eventid")
-	Dbmap.AddTableWithName(Weventuser{}, "weventuser").SetKeys(false, "Eventid", "Userno")
+	/*
+		Dbmap.AddTableWithName(User{}, "user").SetKeys(false, "Userno")
+		Dbmap.AddTableWithName(Userhistory{}, "userhistory").SetKeys(false, "Userno", "Ts")
+		// srdblib.Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
+		// srdblib.Dbmap.AddTableWithName(TWuser{}, "wuser").SetKeys(false, "Userno")
+		Dbmap.AddTableWithName(Wuserhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
+		Dbmap.AddTableWithName(Event{}, "event").SetKeys(false, "Eventid")
+		Dbmap.AddTableWithName(Eventuser{}, "eventuser").SetKeys(false, "Eventid", "Userno")
+		Dbmap.AddTableWithName(Wevent{}, "wevent").SetKeys(false, "Eventid")
+		Dbmap.AddTableWithName(Weventuser{}, "weventuser").SetKeys(false, "Eventid", "Userno")
+	*/
+	srdblib.AddTableWithName()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := UpinsEventuserG(&tt.args.weu, tt.args.tnow); (err != nil) != tt.wantErr {
+			if err := srdblib.UpinsEventuserG(&tt.args.weu, tt.args.tnow); (err != nil) != tt.wantErr {
 				t.Errorf("UpinsEventuser() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

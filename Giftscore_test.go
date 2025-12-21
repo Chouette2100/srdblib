@@ -1,7 +1,7 @@
 // Copyright © 2024 chouette.21.00@gmail.com
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
-package srdblib
+package srdblib_test
 
 import (
 	"fmt"
@@ -12,9 +12,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-gorp/gorp"
+
 	"github.com/Chouette2100/exsrapi/v2"
 	"github.com/Chouette2100/srapi/v2"
-	"github.com/go-gorp/gorp"
+	"github.com/Chouette2100/srdblib/v2"
 )
 
 func TestInserIntoGiftScore(t *testing.T) {
@@ -28,7 +30,7 @@ func TestInserIntoGiftScore(t *testing.T) {
 	}
 
 	fileenv := "Env.yml"
-	err := exsrapi.LoadConfig(fileenv, &Env)
+	err := exsrapi.LoadConfig(fileenv, &srdblib.Env)
 	if err != nil {
 		err = fmt.Errorf("exsrapi.Loadconfig(): %w", err)
 		log.Printf("%s\n", err.Error())
@@ -44,16 +46,15 @@ func TestInserIntoGiftScore(t *testing.T) {
 	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
 
 	//      データベースとの接続をオープンする。
-	dbconfig, err := OpenDb("DBConfig.yml")
+	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		log.Printf("srdblib.OpenDb() error. err=%s.\n", err.Error())
 		return
 	}
 	if dbconfig.UseSSH {
-		defer Dialer.Close()
+		defer srdblib.Dialer.Close()
 	}
-	defer Db.Close()
-
+	defer srdblib.Db.Close()
 	log.Printf("dbconfig=%v\n", dbconfig)
 
 	//	srdblib.Tevent = "wevent"
@@ -62,16 +63,20 @@ func TestInserIntoGiftScore(t *testing.T) {
 	//	srdblib.Tuserhistory = "wuserhistory"
 
 	dial := gorp.MySQLDialect{Engine: "InnoDB", Encoding: "utf8mb4"}
-	Dbmap = &gorp.DbMap{Db: Db, Dialect: dial, ExpandSliceArgs: true}
-	//	srdblib.Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
-	//	srdblib.Dbmap.AddTableWithName(srdblib.Userhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
-	//	srdblib.Dbmap.AddTableWithName(srdblib.Event{}, "wevent").SetKeys(false, "Eventid")
-	//	srdblib.Dbmap.AddTableWithName(srdblib.Eventuser{}, "weventuser").SetKeys(false, "Eventid", "Userno")
-	//	Dbmap.AddTableWithName(Event{}, "event").SetKeys(false, "Eventid")
-	Dbmap.AddTableWithName(User{}, "user").SetKeys(false, "Userno")
-	Dbmap.AddTableWithName(GiftScore{}, "giftscore").SetKeys(false, "Giftid", "Ts", "Userno")
-	Dbmap.AddTableWithName(Viewer{}, "viewer").SetKeys(false, "Viewerid")
-	Dbmap.AddTableWithName(ViewerGiftScore{}, "viewergiftscore").SetKeys(false, "Giftid", "Ts", "Viewerid")
+	srdblib.Dbmap = &gorp.DbMap{Db: srdblib.Db, Dialect: dial, ExpandSliceArgs: true}
+	/*
+		//	srdblib.Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
+		//	srdblib.Dbmap.AddTableWithName(srdblib.Userhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
+		//	srdblib.Dbmap.AddTableWithName(srdblib.Event{}, "wevent").SetKeys(false, "Eventid")
+		//	srdblib.Dbmap.AddTableWithName(srdblib.Eventuser{}, "weventuser").SetKeys(false, "Eventid", "Userno")
+		//	Dbmap.AddTableWithName(Event{}, "event").SetKeys(false, "Eventid")
+		Dbmap.AddTableWithName(User{}, "user").SetKeys(false, "Userno")
+		Dbmap.AddTableWithName(GiftScore{}, "giftscore").SetKeys(false, "Giftid", "Ts", "Userno")
+		Dbmap.AddTableWithName(Viewer{}, "viewer").SetKeys(false, "Viewerid")
+		Dbmap.AddTableWithName(ViewerGiftScore{}, "viewergiftscore").SetKeys(false, "Giftid", "Ts", "Viewerid")
+	*/
+
+	srdblib.AddTableWithName()
 
 	//      cookiejarがセットされたHTTPクライアントを作る
 	client, jar, err := exsrapi.CreateNewClient("ShowroomCGI")
@@ -106,7 +111,7 @@ func TestInserIntoGiftScore(t *testing.T) {
 			name: "test",
 			args: args{
 				client: client,
-				dbmap:  Dbmap,
+				dbmap:  srdblib.Dbmap,
 				giftid: 1,
 				cgr:    cgr,
 				idx:    1,
@@ -119,7 +124,7 @@ func TestInserIntoGiftScore(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			log.Printf("%+v\n", tt.args)
-			if err := InserIntoGiftScore(tt.args.client, tt.args.dbmap, tt.args.giftid, &tt.args.cgr.RankingList[0], tt.args.tnow); (err != nil) != tt.wantErr {
+			if err := srdblib.InserIntoGiftScore(tt.args.client, tt.args.dbmap, tt.args.giftid, &tt.args.cgr.RankingList[0], tt.args.tnow); (err != nil) != tt.wantErr {
 				t.Errorf("InserIntoGiftScore() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -144,16 +149,15 @@ func TestInserIntoViewerGiftScore(t *testing.T) {
 	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
 
 	//      データベースとの接続をオープンする。
-	dbconfig, err := OpenDb("DBConfig.yml")
+	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		log.Printf("srdblib.OpenDb() error. err=%s.\n", err.Error())
 		return
 	}
 	if dbconfig.UseSSH {
-		defer Dialer.Close()
+		defer srdblib.Dialer.Close()
 	}
-	defer Db.Close()
-
+	defer srdblib.Db.Close()
 	log.Printf("dbconfig=%v\n", dbconfig)
 
 	//	srdblib.Tevent = "wevent"
@@ -162,17 +166,21 @@ func TestInserIntoViewerGiftScore(t *testing.T) {
 	//	srdblib.Tuserhistory = "wuserhistory"
 
 	dial := gorp.MySQLDialect{Engine: "InnoDB", Encoding: "utf8mb4"}
-	Dbmap = &gorp.DbMap{Db: Db, Dialect: dial, ExpandSliceArgs: true}
-	//	srdblib.Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
-	//	srdblib.Dbmap.AddTableWithName(srdblib.Userhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
-	//	srdblib.Dbmap.AddTableWithName(srdblib.Event{}, "wevent").SetKeys(false, "Eventid")
-	//	srdblib.Dbmap.AddTableWithName(srdblib.Eventuser{}, "weventuser").SetKeys(false, "Eventid", "Userno")
-	//	Dbmap.AddTableWithName(Event{}, "event").SetKeys(false, "Eventid")
-	Dbmap.AddTableWithName(User{}, "user").SetKeys(false, "Userno")
-	Dbmap.AddTableWithName(GiftScore{}, "giftscore").SetKeys(false, "Giftid", "Ts", "Userno")
-	Dbmap.AddTableWithName(Viewer{}, "viewer").SetKeys(false, "Viewerid")
-	Dbmap.AddTableWithName(ViewerHistory{}, "viewerhistory").SetKeys(false, "Viewerid", "Ts")
-	Dbmap.AddTableWithName(ViewerGiftScore{}, "viewergiftscore").SetKeys(false, "Giftid", "Ts", "Viewerid")
+	srdblib.Dbmap = &gorp.DbMap{Db: srdblib.Db, Dialect: dial, ExpandSliceArgs: true}
+	/*
+		//	Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
+		//	Dbmap.AddTableWithName(srdblib.Userhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
+		//	Dbmap.AddTableWithName(srdblib.Event{}, "wevent").SetKeys(false, "Eventid")
+		//	Dbmap.AddTableWithName(srdblib.Eventuser{}, "weventuser").SetKeys(false, "Eventid", "Userno")
+		//	Dbmap.AddTableWithName(Event{}, "event").SetKeys(false, "Eventid")
+		Dbmap.AddTableWithName(User{}, "user").SetKeys(false, "Userno")
+		Dbmap.AddTableWithName(GiftScore{}, "giftscore").SetKeys(false, "Giftid", "Ts", "Userno")
+		Dbmap.AddTableWithName(Viewer{}, "viewer").SetKeys(false, "Viewerid")
+		Dbmap.AddTableWithName(ViewerHistory{}, "viewerhistory").SetKeys(false, "Viewerid", "Ts")
+		Dbmap.AddTableWithName(ViewerGiftScore{}, "viewergiftscore").SetKeys(false, "Giftid", "Ts", "Viewerid")
+	*/
+
+	srdblib.AddTableWithName()
 
 	//      cookiejarがセットされたHTTPクライアントを作る
 	client, jar, err := exsrapi.CreateNewClient("ShowroomCGI")
@@ -190,7 +198,7 @@ func TestInserIntoViewerGiftScore(t *testing.T) {
 				OrderNo: 1,
 				Score:   141,
 				User: srapi.UgrUser{
-					Name:   "g͙a͙k͙u͙🏖Aϖϖϖϖϖa🌈ラ王、ア王ギフトお願い",
+					Name: "g͙a͙k͙u͙🏖Aϖϖϖϖϖa🌈ラ王、ア王ギフトお願い",
 				},
 			},
 		},
@@ -205,9 +213,9 @@ func TestInserIntoViewerGiftScore(t *testing.T) {
 			name: "test",
 			args: args{
 				client: client,
-				dbmap:  Dbmap,
+				dbmap:  srdblib.Dbmap,
 				giftid: 206,
-				cugr:    cugr,
+				cugr:   cugr,
 				idx:    0,
 				tnow:   time.Now(),
 			},
@@ -220,7 +228,7 @@ func TestInserIntoViewerGiftScore(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			log.Printf("%+v\n", tt.args)
-			if err := InserIntoViewerGiftScore(tt.args.client, tt.args.dbmap, tt.args.giftid, &tt.args.cugr.RankingList[tt.args.idx], tt.args.tnow); (err != nil) != tt.wantErr {
+			if err := srdblib.InserIntoViewerGiftScore(tt.args.client, tt.args.dbmap, tt.args.giftid, &tt.args.cugr.RankingList[tt.args.idx], tt.args.tnow); (err != nil) != tt.wantErr {
 				t.Errorf("InserIntoViewerGiftScore() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

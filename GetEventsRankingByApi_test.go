@@ -1,7 +1,7 @@
 // Copyright © 2024 chouette.21.00@gmail.com
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
-package srdblib
+package srdblib_test
 
 import (
 	"io"
@@ -16,6 +16,7 @@ import (
 
 	"github.com/Chouette2100/exsrapi/v2"
 	"github.com/Chouette2100/srapi/v2"
+	"github.com/Chouette2100/srdblib/v2"
 )
 
 func TestGetEventsRankingByApi(t *testing.T) {
@@ -33,15 +34,15 @@ func TestGetEventsRankingByApi(t *testing.T) {
 	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
 
 	//      データベースとの接続をオープンする。
-	dbconfig, err := OpenDb("DBConfig.yml")
+	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		log.Printf("srdblib.OpenDb() error. err=%s.\n", err.Error())
 		return
 	}
 	if dbconfig.UseSSH {
-		defer Dialer.Close()
+		defer srdblib.Dialer.Close()
 	}
-	defer Db.Close()
+	defer srdblib.Db.Close()
 
 	log.Printf("dbconfig=%v\n", dbconfig)
 
@@ -51,12 +52,12 @@ func TestGetEventsRankingByApi(t *testing.T) {
 	//	srdblib.Tuserhistory = "wuserhistory"
 
 	dial := gorp.MySQLDialect{Engine: "InnoDB", Encoding: "utf8mb4"}
-	Dbmap = &gorp.DbMap{Db: Db, Dialect: dial, ExpandSliceArgs: true}
+	srdblib.Dbmap = &gorp.DbMap{Db: srdblib.Db, Dialect: dial, ExpandSliceArgs: true}
 	//	srdblib.Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
 	//	srdblib.Dbmap.AddTableWithName(srdblib.Userhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
 	//	srdblib.Dbmap.AddTableWithName(srdblib.Event{}, "wevent").SetKeys(false, "Eventid")
 	//	srdblib.Dbmap.AddTableWithName(srdblib.Eventuser{}, "weventuser").SetKeys(false, "Eventid", "Userno")
-	Dbmap.AddTableWithName(Event{}, "event").SetKeys(false, "Eventid")
+	srdblib.Dbmap.AddTableWithName(srdblib.Event{}, "event").SetKeys(false, "Eventid")
 
 	//      cookiejarがセットされたHTTPクライアントを作る
 	client, jar, err := exsrapi.CreateNewClient("ShowroomCGI")
@@ -128,7 +129,7 @@ func TestGetEventsRankingByApi(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotPranking, err := GetEventsRankingByApi(tt.args.client, tt.args.eid, tt.args.mode)
+			gotPranking, err := srdblib.GetEventsRankingByApi(tt.args.client, tt.args.eid, tt.args.mode)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetEventsRankingByApi() error = %v, wantErr %v", err, tt.wantErr)
 				return

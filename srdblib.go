@@ -81,9 +81,10 @@ import (
 200502  accesslogテーブルにis_botカラムを追加する。
 200503  accesslogテーブルにTurnstilestatuカラムを追加する。
 200504  accesslogテーブルにRegionカラムを追加する。
+200600  AddTableWithName()を追加する。srdblib_testパッケージを導入する。
 */
 
-const Version = "200504"
+const Version = "200600"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

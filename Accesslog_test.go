@@ -1,7 +1,7 @@
 // Copyright © 2024 chouette2100@gmail.com
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
-package srdblib
+package srdblib_test
 
 import (
 	"io"
@@ -13,6 +13,7 @@ import (
 	"github.com/go-gorp/gorp"
 
 	"github.com/Chouette2100/exsrapi/v2"
+	"github.com/Chouette2100/srdblib/v2"
 )
 
 func TestGetFeaturedEvents(t *testing.T) {
@@ -73,25 +74,25 @@ func TestGetFeaturedEvents(t *testing.T) {
 	}
 	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
 
-	dbconfig, err := OpenDb("DBConfig.yml")
+	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		t.Errorf("Database error. err = %v\n", err)
 		log.Printf("Database error. err = %v\n", err)
 		return
 	}
 	if dbconfig.UseSSH {
-		defer Dialer.Close()
+		defer srdblib.Dialer.Close()
 	}
-	defer Db.Close()
+	defer srdblib.Db.Close()
 
 	dial := gorp.MySQLDialect{Engine: "InnoDB", Encoding: "utf8mb4"}
-	Dbmap = &gorp.DbMap{Db: Db, Dialect: dial, ExpandSliceArgs: true}
+	srdblib.Dbmap = &gorp.DbMap{Db: srdblib.Db, Dialect: dial, ExpandSliceArgs: true}
 
 	log.Printf("dbconfig = %+v\n", dbconfig)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotEvents, _ := GetFeaturedEvents(tt.args.mode, tt.args.hours, tt.args.num, tt.args.lmct); !reflect.DeepEqual(gotEvents, tt.wantEvents) {
+			if gotEvents, _ := srdblib.GetFeaturedEvents(tt.args.mode, tt.args.hours, tt.args.num, tt.args.lmct); !reflect.DeepEqual(gotEvents, tt.wantEvents) {
 				t.Errorf("GetFeaturedEvents() = %v, want %v", gotEvents, tt.wantEvents)
 			} else {
 				t.Logf("GetFeaturedEvents() = %v, want %v", gotEvents, tt.wantEvents)

@@ -1,19 +1,20 @@
-package srdblib
+package srdblib_test
 
 import (
-	"log"
 	"io"
+	"log"
 	"os"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/Chouette2100/exsrapi/v2"
+	"github.com/Chouette2100/srdblib/v2"
 )
 
 func TestSelectFromEvent(t *testing.T) {
 	type args struct {
-		tevent string
+		tevent  string
 		eventid string
 	}
 
@@ -28,7 +29,7 @@ func TestSelectFromEvent(t *testing.T) {
 		{
 			name: "test1",
 			args: args{
-				tevent: "wevent",
+				tevent:  "wevent",
 				eventid: "puzzle01",
 			},
 			wantPeventinf: &exsrapi.Event_Inf{
@@ -81,22 +82,22 @@ func TestSelectFromEvent(t *testing.T) {
 	}
 	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
 
-	dbconfig, err := OpenDb("DBConfig.yml")
+	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		t.Errorf("Database error. err = %v\n", err)
 		log.Printf("Database error. err = %v\n", err)
 		return
 	}
 	if dbconfig.UseSSH {
-		defer Dialer.Close()
+		defer srdblib.Dialer.Close()
 	}
-	defer Db.Close()
+	defer srdblib.Db.Close()
 
 	log.Printf("dbconfig = %+v\n", dbconfig)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotPeventinf, err := SelectFromEvent(tt.args.tevent, tt.args.eventid)
+			gotPeventinf, err := srdblib.SelectFromEvent(tt.args.tevent, tt.args.eventid)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SelectFromEvent() error = %v, wantErr %v", err, tt.wantErr)
 				return
