@@ -82,9 +82,10 @@ import (
 200503  accesslogテーブルにTurnstilestatuカラムを追加する。
 200504  accesslogテーブルにRegionカラムを追加する。
 200600  AddTableWithName()を追加する。srdblib_testパッケージを導入する。
+200601  userhistoryの新規データ作成条件をestatus=　1 or 2 から　estatus != 4　に変更する。
 */
 
-const Version = "200600"
+const Version = "200601"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
