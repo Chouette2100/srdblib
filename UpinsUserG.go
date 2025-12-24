@@ -229,9 +229,10 @@ func UpinsUser[T UserT](
 		log.Printf("UpinsUser() user=%+v is up to date\n", user.Userno)
 	default:
 	}
-	if estatus != 4 {
+	log.Printf("UpinsUser() e=%d, xuser type: %T\n", estatus, xuser)
+	if estatus < 2 {
 		switch any(xuser).(type) {
-		case User:
+		case *User, User, *Wuser, Wuser:
 			InsertUserhistory(&Userhistory{}, vdata)
 		default:
 			log.Printf("UpinsUser() InsertUserhistory() not executed\n")

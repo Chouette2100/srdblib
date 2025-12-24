@@ -1,9 +1,12 @@
 package srdblib
+
 import (
 	"fmt"
-	"time"
 	"github.com/jinzhu/copier"
+	"log"
+	"time"
 )
+
 // userの履歴を保存する構造体
 // PRIMARY KEY (`userno`,`ts`)
 type Userhistory struct {
@@ -26,7 +29,7 @@ type Wuserhistory Userhistory
 type UserhistoryT interface {
 	Get() (*User, error)
 	Set(*User) error
-}	
+}
 
 // Getter and Setter for Userhistory
 func (uh *Userhistory) Get() (
@@ -62,6 +65,7 @@ func InsertUserhistory[T UserhistoryT](
 ) (
 	err error,
 ) {
+	log.Printf("InsertUserhistory: user=%+v\n", user)
 	xuserhistory.Set(user)
 	err = Dbmap.Insert(xuserhistory)
 	if err != nil {
@@ -69,4 +73,3 @@ func InsertUserhistory[T UserhistoryT](
 	}
 	return
 }
-
