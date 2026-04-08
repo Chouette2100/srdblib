@@ -24,7 +24,7 @@ func GetEventsRankingByApi(
 ) {
 
 	// イベントの詳細を得る、ここではIeventidが必要である
-	var row interface{}
+	var row any
 	row, err = Dbmap.Get(Event{}, eid)
 	if err != nil {
 		err = fmt.Errorf("Dbmap.Get(): %w", err)
@@ -77,7 +77,7 @@ func GetEventsRankingByApi(
 		// if len(roomlistinf.RoomList) == 0 {
 		if len(roomlistinf.Ranking) == 0 {
 			//  エントリーしているルームが一つもない。
-			var intf []interface{}
+			var intf []any
 			intf, err = Dbmap.Select(Eventuser{}, "select userno from eventuser where eventid=?", eid)
 			if err != nil {
 				err = fmt.Errorf("Dbmap.Select(): %w", err)

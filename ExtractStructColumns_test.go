@@ -11,7 +11,7 @@ import (
 
 func TestExtractStructColumns(t *testing.T) {
 	type args struct {
-		model interface{}
+		model any
 	}
 	tests := []struct {
 		name string

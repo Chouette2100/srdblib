@@ -85,9 +85,10 @@ import (
 200601  userhistoryの新規データ作成条件をestatus=　1 or 2 から　estatus != 4　に変更する。
 200602  UpinsUser()での型チェックではxuserの型はポインター型として扱う。
         userhistoryの新規データ作成条件をestatus != 4 から estatus < 2　に変更する。
+200700  interface{} を any に変更する等新しいスタイルにする。
 */
 
-const Version = "200602"
+const Version = "200700"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

@@ -160,23 +160,34 @@ func GetLastUserdata[T UserT](
 			estatus = 1
 		}
 	}
+	log.Printf(" estatus=%d vdata.ts=%s\n", estatus, vdata.Ts.Format("2006-01-02 15:04:05"))
 
-	if estatus < 2 {
-		// TODO: ここで上で取得しなかったデータを取得すべき
-		tdata, terr = GetUserOrWuserData(next)
-		if terr != nil {
-			// userテーブルのデータが取得できない
-			err = fmt.Errorf("Get(%d): database access error", userno)
-			return
-		} else if tdata == nil {
-			return
-		} else {
-			vdata = tdata
-			if vdata.Ts.After(time.Now().Add(time.Duration(-Env.Lmin) * time.Minute)) {
+	// if estatus < 2 {
+	// TODO: ここで上で取得しなかったデータを取得すべき
+	tdata, terr = GetUserOrWuserData(next)
+	if terr != nil {
+		// userテーブルのデータが取得できない
+		err = fmt.Errorf("Get(%d): database access error", userno)
+		return
+	} else if tdata == nil {
+		return
+	} else {
+		// vdata = tdata
+		// if vdata.Ts.After(time.Now().Add(time.Duration(-Env.Lmin) * time.Minute)) {
+		if tdata.Ts.After(time.Now().Add(time.Duration(-Env.Lmin) * time.Minute)) {
+			if estatus < 2 {
 				estatus += 2
 			}
 		}
+		if vdata != nil {
+			if tdata.Ts.After(vdata.Ts) {
+				vdata = tdata
+			}
+		}
 	}
+	// }
+	log.Printf(" estatus=%d vdata.ts=%s\n", estatus, vdata.Ts.Format("2006-01-02 15:04:05"))
+	log.Printf(" estatus=%d vdata.ts=%s\n", estatus, vdata.Ts.Format("2006-01-02 15:04:05"))
 	return
 }
 
@@ -282,7 +293,7 @@ func SelectUserdata[T UserT](xu T, userno int) (
 	err error,
 ) {
 
-	var intf interface{}
+	var intf any
 
 	intf, err = Dbmap.Get(xu, userno)
 	if err != nil {
@@ -517,7 +528,7 @@ func InsertUsertable[T UserT](
 func GetUserOrWuserData(user1 UserT) (vdata *User, verr error) {
 
 	cuser, _ := user1.Get()
-	var intf1 interface{}
+	var intf1 any
 	// var intf1, intf2 interface{}
 
 	intf1, verr = Dbmap.Get(user1, cuser.Userno)

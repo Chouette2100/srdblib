@@ -126,7 +126,7 @@ func UpinsEventuser(
 				return
 			}
 		*/
-		var row interface{}
+		var row any
 		row, err = Dbmap.Get(User{}, userno)
 		if err != nil {
 			err = fmt.Errorf("Get(userno=%d) returned error. %w", userno, err)

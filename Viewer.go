@@ -1,6 +1,6 @@
-//	Copyright © 2024 chouette.21.00@gmail.com
-//	Released under the MIT license
-//	https://opensource.org/licenses/mit-license.php
+// Copyright © 2024 chouette.21.00@gmail.com
+// Released under the MIT license
+// https://opensource.org/licenses/mit-license.php
 package srdblib
 
 import (
@@ -13,9 +13,7 @@ import (
 	"time"
 
 	"net/http"
-
 	//	"github.com/go-gorp/gorp"
-
 	//	"github.com/dustin/go-humanize"
 )
 
@@ -28,18 +26,18 @@ import (
 //	const Version = "0.0.1"
 
 type Viewer struct {
-  Viewerid int
-  Name string
-  Sname string
-  Ts time.Time
-  //	Orderno int	//	GiftScoreのOrdernoを受けるために追加したメンバー、テーブルには存在しない
+	Viewerid int
+	Name     string
+	Sname    string
+	Ts       time.Time
+	//	Orderno int	//	GiftScoreのOrdernoを受けるために追加したメンバー、テーブルには存在しない
 }
 
-type ViewerHistory struct{
-  Viewerid int
-  Name string	//	ランキングデータにあるリスナー名
-  Sname string	//	リスナーの表示名（User.Longnameと同様、User.Shortnameに相当するものはない）
-  Ts time.Time
+type ViewerHistory struct {
+	Viewerid int
+	Name     string //	ランキングデータにあるリスナー名
+	Sname    string //	リスナーの表示名（User.Longnameと同様、User.Shortnameに相当するものはない）
+	Ts       time.Time
 }
 
 /*
@@ -98,7 +96,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer)
 		vw = intfc.(*Viewer)
 
 		nodata := false
-		vh := ViewerHistory{}		//	指定したviewidの最後のデータのTsのみが格納される
+		vh := ViewerHistory{} //	指定したviewidの最後のデータのTsのみが格納される
 		sqlst := "select max(ts) ts from viewerhistory where viewerid = ? "
 		err = Dbmap.SelectOne(&vh, sqlst, vw.Viewerid)
 		if err != nil {
@@ -111,7 +109,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer)
 			nodata = true
 		}
 
-		pintf := interface{}(nil)
+		pintf := any(nil)
 		if !nodata {
 			pintf, err = Dbmap.Get(ViewerHistory{}, vw.Viewerid, vh.Ts)
 			if err != nil {
@@ -119,7 +117,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer)
 				log.Printf("error: %v", err)
 				return err
 			}
-			vwh = pintf.(*ViewerHistory) 	// 履歴にある最後のデータの最後（存在すれば）
+			vwh = pintf.(*ViewerHistory) // 履歴にある最後のデータの最後（存在すれば）
 		} else {
 			vwh = nil
 		}

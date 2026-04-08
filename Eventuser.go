@@ -98,7 +98,7 @@ func SelectEudata[T EventuserR](xeu *T, eventid string, userno int) (
 	err error,
 ) {
 
-	var intf interface{}
+	var intf any
 
 	intf, err = Dbmap.Get(xeu, eventid, userno)
 	if err != nil {

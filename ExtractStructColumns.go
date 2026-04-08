@@ -13,7 +13,7 @@ const key = "db" // struct tag key
 
 // ExtractStructColumns returns a comma-separated string of struct fields.
 // gorpを使う場合はこの関数は必要ない、gorpに完全に移行するまでの暫定措置
-func ExtractStructColumns(model interface{}) string {
+func ExtractStructColumns(model any) string {
 	columns := GetStructColumns(model)
 	clmlist := strings.Join(columns, ", ")
 	sname := GetStructName(model)
@@ -27,9 +27,9 @@ func ExtractStructColumns(model interface{}) string {
 }
 
 // GetStructColumns returns a slice of struct fields.
-func GetStructColumns(model interface{}) []string {
+func GetStructColumns(model any) []string {
 	t := reflect.TypeOf(model)
-	if t.Kind() == reflect.Ptr {
+	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 	var columns []string
@@ -39,8 +39,8 @@ func GetStructColumns(model interface{}) []string {
 
 // collectColumns collects struct fields recursively.
 func collectColumns(t reflect.Type, columns *[]string) {
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
+	for field := range t.Fields() {
+		field := field
 		if field.Anonymous {
 			// 埋め込みフィールドの場合、再帰的に処理
 			collectColumns(field.Type, columns)
@@ -65,7 +65,7 @@ func collectColumns(t reflect.Type, columns *[]string) {
 // GetStructName extracts the name of the struct from an interface value.
 // If the value is a pointer to a struct, it returns the name of the struct it points to.
 // If the value is not a struct or a pointer to a struct, it returns an empty string.
-func GetStructName(model interface{}) string {
+func GetStructName(model any) string {
 	if model == nil {
 		return ""
 	}
@@ -76,7 +76,7 @@ func GetStructName(model interface{}) string {
 
 	// もし型がポインタであれば、Elem() を使ってポインタが指す先の型を取得します。
 	// 例: *main.Event -> main.Event
-	if t.Kind() == reflect.Ptr {
+	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}
 
