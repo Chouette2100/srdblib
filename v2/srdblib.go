@@ -88,9 +88,10 @@ import (
 200700  interface{} を any に変更する等新しいスタイルにする。
 200800  v3では複数データベースサーバーに対応する。
 200801  v2、v3を並行して進めるための準備。v3では複数データベースサーバーに対応する。
+200802  go.modの誤り（Chouette2100.com）を修正する。
 */
 
-const Version = "200801"
+const Version = "200802"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

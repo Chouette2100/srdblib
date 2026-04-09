@@ -1,3 +1,3 @@
-module Chouette2100.com/srdblib
+module github.com/Chouette2100/srdblib
 
 go 1.26.1
