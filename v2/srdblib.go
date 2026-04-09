@@ -86,10 +86,11 @@ import (
 200602  UpinsUser()での型チェックではxuserの型はポインター型として扱う。
         userhistoryの新規データ作成条件をestatus != 4 から estatus < 2　に変更する。
 200700  interface{} を any に変更する等新しいスタイルにする。
-200800  複数データベースサーバーに対応する。
+200800  v3では複数データベースサーバーに対応する。
+200801  v2、v3を並行して進めるための準備。v3では複数データベースサーバーに対応する。
 */
 
-const Version = "200800"
+const Version = "200801"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`
