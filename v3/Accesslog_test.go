@@ -1,0 +1,102 @@
+// Copyright © 2024 chouette2100@gmail.com
+// Released under the MIT license
+// https://opensource.org/licenses/mit-license.php
+package srdblib_test
+
+import (
+	"io"
+	"log"
+	"os"
+	"reflect"
+	"testing"
+
+	"github.com/go-gorp/gorp"
+
+	"github.com/Chouette2100/exsrapi/v2"
+	"github.com/Chouette2100/srdblib/v3"
+)
+
+func TestGetFeaturedEvents(t *testing.T) {
+	type args struct {
+		mode  string // "current" or "closed"
+		hours int
+		num   int
+		lmct  int
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantEvents map[string]bool
+	}{
+		{
+			name: "current",
+			args: args{
+				mode:  "current",
+				hours: 48,
+				num:   18,
+				lmct:  16,
+			},
+			wantEvents: map[string]bool{
+				"SelectFromEvent_test": true,
+			},
+		},
+		{
+			name: "closed",
+			args: args{
+				mode:  "closed",
+				hours: 72,
+				num:   24,
+				lmct:  8,
+			},
+			wantEvents: map[string]bool{
+				"SelectFromEvent_test": true,
+			},
+		},
+		{
+			name: "scheduled",
+			args: args{
+				mode:  "scheduled",
+				hours: 72,
+				num:   24,
+				lmct:  8,
+			},
+			wantEvents: map[string]bool{
+				"SelectFromEvent_test": true,
+			},
+		},
+		// TODO: Add test cases.
+	}
+
+	logfile, err := exsrapi.CreateLogfile("SelectFromEvent_testg")
+	if err != nil {
+		t.Errorf("logfile error. err = %v\n", err)
+		return
+	}
+	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
+
+	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
+	if err != nil {
+		t.Errorf("Database error. err = %v\n", err)
+		log.Printf("Database error. err = %v\n", err)
+		return
+	}
+	if dbconfig.UseSSH {
+		defer srdblib.Dialer.Close()
+	}
+	defer srdblib.Db.Close()
+
+	dial := gorp.MySQLDialect{Engine: "InnoDB", Encoding: "utf8mb4"}
+	srdblib.Dbmap = &gorp.DbMap{Db: srdblib.Db, Dialect: dial, ExpandSliceArgs: true}
+
+	log.Printf("dbconfig = %+v\n", dbconfig)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotEvents, _ := srdblib.GetFeaturedEvents(tt.args.mode, tt.args.hours, tt.args.num, tt.args.lmct); !reflect.DeepEqual(gotEvents, tt.wantEvents) {
+				t.Errorf("GetFeaturedEvents() = %v, want %v", gotEvents, tt.wantEvents)
+			} else {
+				t.Logf("GetFeaturedEvents() = %v, want %v", gotEvents, tt.wantEvents)
+			}
+		})
+	}
+}
