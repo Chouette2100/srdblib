@@ -3,11 +3,15 @@
 #UseSSH: true
 #
 ## DBサーバーのホスト名、指定しなければlocalhost
-#DBhost:
+DBhost: 127.0.0.1
+DBport: 9910
 # データベース名
-DBname:	${DBNAME}
+#DBname:	${DBNAME}
+DBname:	showroom
 #
 #
 # ログイン名とパスワードは環境変数で渡す
-DBuser:	${DBUSER}
-DBpswd:	${DBPW}
+#DBuser:	${DBUSER}
+#DBpswd:	${DBPW}
+DBuser:	iapetus
+DBpswd:	dgn895DGN--

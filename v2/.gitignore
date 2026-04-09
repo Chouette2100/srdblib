@@ -1,0 +1,4 @@
+launch.json
+*.txt
+*_cookies
+generic_test/*
