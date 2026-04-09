@@ -5,10 +5,14 @@ import (
 	"log"
 	"time"
 
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/Chouette2100/exsrapi/v2"
 )
 
 func SelectFromEvent(
+	db *sql.DB,
 	tevent string,
 	eventid string,
 ) (
@@ -22,7 +26,7 @@ func SelectFromEvent(
 	sql := "select eventid,ieventid,event_name, period, starttime, endtime, noentry, intervalmin, modmin, modsec, "
 	sql += " Fromorder, Toorder, Resethh, Resetmm, Nobasis, Maxdsp, cmap, target, `rstatus`, maxpoint, thinit, thdelta "
 	sql += " from " + tevent + " where eventid = ?"
-	err = Db.QueryRow(sql, eventid).Scan(
+	err = db.QueryRow(sql, eventid).Scan(
 		&eventinf.Event_ID,
 		&eventinf.I_Event_ID,
 		&eventinf.Event_name,

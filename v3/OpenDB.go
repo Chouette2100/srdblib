@@ -18,7 +18,7 @@ import (
 	//	"github.com/PuerkitoBio/goquery"
 	//	"github.com/dustin/go-humanize"
 
-	"github.com/go-gorp/gorp"
+	// "github.com/go-gorp/gorp"
 
 	"github.com/Chouette2100/exsrapi/v2"
 )
@@ -48,16 +48,17 @@ type DBConfig struct {
 }
 
 var Dialer sshql.Dialer
-var Db *sql.DB //  プログラム中では一貫してこの変数を使うこと
+
+// var Db *sql.DB //  プログラム中では一貫してこの変数を使うこと
 // var Dberr error
-var Dbmap *gorp.DbMap
+// var Dbmap *gorp.DbMap
 
 //	var Tevent = "event"
 //	var Teventuser = "eventuser"
 //	var Tuser = "user"
 //	var Tuserhistory = "userhistory"
 
-func OpenDb(filenameofdbconfig string) (dbconfig *DBConfig, err error) {
+func OpenDb(filenameofdbconfig string) (db *sql.DB, dbconfig *DBConfig, err error) {
 
 	//	https://leben.mobi/go/mysql-connect/practice/
 	//	OS := runtime.GOOS
@@ -90,7 +91,8 @@ func OpenDb(filenameofdbconfig string) (dbconfig *DBConfig, err error) {
 		cnc = "@ssh+tcp"
 	}
 	cnc += "(" + dbconfig.DBhost + ":" + dbconfig.DBport + ")"
-	Db, err = sql.Open("mysql", dbconfig.DBuser+":"+dbconfig.DBpswd+cnc+"/"+dbconfig.DBname+"?parseTime=true&loc=Asia%2FTokyo")
+	// var db *sql.DB
+	db, err = sql.Open("mysql", dbconfig.DBuser+":"+dbconfig.DBpswd+cnc+"/"+dbconfig.DBname+"?parseTime=true&loc=Asia%2FTokyo")
 	if err != nil {
 		err = fmt.Errorf("sql.Open(): %w", err)
 	}

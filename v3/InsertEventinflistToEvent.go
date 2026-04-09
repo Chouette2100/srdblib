@@ -24,6 +24,7 @@ import (
 処理の状況を示すために使われる。
 */
 func InsertEventinflistToEvent(
+	db *sql.DB, //	データベースへの接続
 	tevent string, //	insertするテーブル
 	eventinflist *[]exsrapi.Event_Inf, //	イベント情報リスト
 	bcheck bool, //	true:	キーが同一のレコードの存在チェックを行う
@@ -38,7 +39,7 @@ func InsertEventinflistToEvent(
 	sql += " fromorder, toorder, resethh, resetmm, nobasis, maxdsp, cmap, target, rstatus, maxpoint, achk" //, aclr	未使用
 	sql += ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 	//	log.Printf("db.Prepare(sql)\n")
-	stmt, err = Db.Prepare(sql)
+	stmt, err = db.Prepare(sql)
 	if err != nil {
 		err = fmt.Errorf("row.Exec(): %w", err)
 		return
@@ -49,7 +50,7 @@ func InsertEventinflistToEvent(
 		//	存在確認
 		nrow := 0
 		if bcheck {
-			if err = Db.QueryRow("select count(*) from "+tevent+" where eventid = ?", eventinf.Event_ID).Scan(&nrow); err != nil {
+			if err = db.QueryRow("select count(*) from "+tevent+" where eventid = ?", eventinf.Event_ID).Scan(&nrow); err != nil {
 				err = fmt.Errorf("QeryRow().Scan(): %w", err)
 				return
 			}

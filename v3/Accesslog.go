@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/go-gorp/gorp"
 )
 
 // アクセスログ accesslog 2024-11-27 〜
@@ -29,6 +31,7 @@ type Accesslog struct {
 
 // 参照回数の多いイベントを抽出する
 func GetFeaturedEvents(
+	dbmap *gorp.DbMap,
 	mode string, // "scheduled", "current" or "closed"  現時点（2025-07-02）では "scheduled" は無意味
 	hours int, // 現在からこの時間遡ったところまでを対象とする
 	num int, //	抽出するイベント数の最大値
@@ -71,7 +74,7 @@ func GetFeaturedEvents(
 	}
 	var events []event
 
-	_, err = Dbmap.Select(&events, sqlst, hours, num)
+	_, err = dbmap.Select(&events, sqlst, hours, num)
 	if err != nil {
 		log.Printf("Error: %v", err)
 	}

@@ -9,12 +9,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-gorp/gorp"
 	"net/http"
 
 	"github.com/Chouette2100/srapi/v2"
 )
 
 func GetEventsRankingByApi(
+	dbmap *gorp.DbMap, //	DBマップ
 	client *http.Client, //	HTTPクライアント
 	eid string, //	イベントID
 	mode int, // 1: イベント開催中 2: イベント終了後
@@ -25,7 +27,7 @@ func GetEventsRankingByApi(
 
 	// イベントの詳細を得る、ここではIeventidが必要である
 	var row any
-	row, err = Dbmap.Get(Event{}, eid)
+	row, err = dbmap.Get(Event{}, eid)
 	if err != nil {
 		err = fmt.Errorf("Dbmap.Get(): %w", err)
 		return
@@ -78,7 +80,7 @@ func GetEventsRankingByApi(
 		if len(roomlistinf.Ranking) == 0 {
 			//  エントリーしているルームが一つもない。
 			var intf []any
-			intf, err = Dbmap.Select(Eventuser{}, "select userno from eventuser where eventid=?", eid)
+			intf, err = dbmap.Select(Eventuser{}, "select userno from eventuser where eventid=?", eid)
 			if err != nil {
 				err = fmt.Errorf("Dbmap.Select(): %w", err)
 				return

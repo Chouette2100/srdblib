@@ -15,6 +15,8 @@ import (
 
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/go-gorp/gorp"
 )
 
 // イベントに新しいユーザを追加する
@@ -25,6 +27,8 @@ import (
 //	user 新規作成または更新
 //	points イベント開始時のデータを新規作成
 func UpinsEventuser(
+	db *sql.DB,
+	dbmap *gorp.DbMap,
 	client *http.Client,
 	order int,
 	point int,
@@ -47,7 +51,7 @@ func UpinsEventuser(
 
 	nrow := 0
 	sqls := "select count(*) from eventuser where userno =? and eventid = ?"
-	err = Db.QueryRow(sqls, userno, eventid).Scan(&nrow)
+	err = db.QueryRow(sqls, userno, eventid).Scan(&nrow)
 
 	if err != nil {
 		log.Printf("select count(*) from user ... err=[%s]\n", err.Error())
@@ -68,9 +72,9 @@ func UpinsEventuser(
 		//	log.Printf("  =====Insert into eventuser userno=%d, eventid=%s\n", userno, eventid)
 		var stmt *sql.Stmt
 		sqli := "INSERT INTO eventuser(eventid, userno, istarget, graph, color, iscntrbpoints, point) VALUES(?,?,?,?,?,?,?)"
-		stmt, err = Db.Prepare(sqli)
+		stmt, err = db.Prepare(sqli)
 		if err != nil {
-			err = fmt.Errorf("Db.Prepare(sqli): %w", err)
+			err = fmt.Errorf("db.Prepare(sqli): %w", err)
 			return
 		}
 		defer stmt.Close()
@@ -101,7 +105,7 @@ func UpinsEventuser(
 		log.Printf("   **** insert into eventuser.\n")
 
 		sqlip := "insert into points (ts, user_id, eventid, point, `rank`, gap, pstatus) values(?,?,?,?,?,?,?)"
-		_, err = Db.Exec(
+		_, err = db.Exec(
 			sqlip,
 			starttime.Truncate(time.Second),
 			userno,
@@ -112,7 +116,7 @@ func UpinsEventuser(
 			"=",
 		)
 		if err != nil {
-			err = fmt.Errorf("Db.Exec(sqlip,...): %w", err)
+			err = fmt.Errorf("db.Exec(sqlip,...): %w", err)
 			return
 		}
 		log.Printf("   **** insert into points.\n")
@@ -127,7 +131,7 @@ func UpinsEventuser(
 			}
 		*/
 		var row any
-		row, err = Dbmap.Get(User{}, userno)
+		row, err = dbmap.Get(User{}, userno)
 		if err != nil {
 			err = fmt.Errorf("Get(userno=%d) returned error. %w", userno, err)
 			return err
@@ -161,9 +165,9 @@ func UpinsEventuser(
 			//	user テーブルにusernoのデータを新たに作成する
 			user := new(User)
 			user.Userno = userno
-			_, err = InsertUsertable(client, tnow, user)
+			_, err = InsertUsertable(dbmap, client, tnow, user)
 			if err != nil {
-				err = fmt.Errorf("InsertUsertable(client, tnow, userno): %w", err)
+				err = fmt.Errorf("InsertUsertable(dbmap, client, tnow, userno): %w", err)
 				return
 			}
 			log.Printf("   **** insert into user.\n")
@@ -245,7 +249,7 @@ func UpinsEventuser(
 		//	log.Printf("  =====Update eventuser userno=%d, eventid=%s\n", userno, eventid)
 		var stmtu *sql.Stmt
 		sqlu := "UPDATE eventuser SET istarget=? where eventid=? and userno=?"
-		stmtu, err = Db.Prepare(sqlu)
+		stmtu, err = db.Prepare(sqlu)
 		if err != nil {
 			log.Printf("error(UPDATE/Prepare) err=%s\n", err.Error())
 			err = fmt.Errorf("Db.Prepare(sqlu): %w", err)

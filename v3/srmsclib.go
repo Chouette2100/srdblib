@@ -1,4 +1,5 @@
-/*!
+/*
+!
 Copyright © 2022 chouette.21.00@gmail.com
 Released under the MIT license
 https://opensource.org/licenses/mit-license.php
@@ -15,13 +16,13 @@ import (
 	"sort"
 	"time"
 
-	//	"database/sql"
-	//	_ "github.com/go-sql-driver/mysql"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/dustin/go-humanize"
 )
 
-func SelectEventNoAndName(tevent, eventid string) (
+func SelectEventNoAndName(db *sql.DB, tevent, eventid string) (
 	eventname string,
 	period string,
 	status int,
@@ -29,7 +30,7 @@ func SelectEventNoAndName(tevent, eventid string) (
 
 	status = 0
 
-	err := Db.QueryRow("select event_name, period from " + tevent + " where eventid ='"+eventid+"'").Scan(&eventname, &period)
+	err := db.QueryRow("select event_name, period from "+tevent+" where eventid ='"+eventid+"'").Scan(&eventname, &period)
 
 	if err == nil {
 		return
@@ -45,8 +46,8 @@ func SelectEventNoAndName(tevent, eventid string) (
 	return
 }
 
-
 func SelectEventRoomInfList(
+	db *sql.DB,
 	tevent string,
 	eventid string,
 	roominfolist *RoomInfoList,
@@ -61,7 +62,7 @@ func SelectEventRoomInfList(
 	//	eventno, eventname, _ = SelectEventNoAndName(eventid)
 	//	Event_inf, _ = SelectEventInf(eventid)
 	//	Event_inf, _ = SelectFromEvent(eventid)
-	eventinf, err := SelectFromEvent(tevent, eventid)
+	eventinf, err := SelectFromEvent(db, tevent, eventid)
 	if err != nil {
 		//	DBの処理でエラーが発生した。
 		status = -1
@@ -85,7 +86,7 @@ func SelectEventRoomInfList(
 		sql += " order by e.point desc"
 	}
 
-	stmt, err := Db.Prepare(sql)
+	stmt, err := db.Prepare(sql)
 	if err != nil {
 		log.Printf("SelectEventRoomInfList() Prepare() err=%s\n", err.Error())
 		status = -5
@@ -247,12 +248,12 @@ func SelectEventRoomInfList(
 	return
 }
 
-func SelectPointList(userno int, eventid string) (norow int, tp *[]time.Time, pp *[]int) {
+func SelectPointList(db *sql.DB, userno int, eventid string) (norow int, tp *[]time.Time, pp *[]int) {
 
 	norow = 0
 
 	//	log.Printf("SelectPointList() userno=%d eventid=%s\n", userno, eventid)
-	stmt1, err := Db.Prepare("SELECT count(*) FROM points where user_id = ? and eventid = ?")
+	stmt1, err := db.Prepare("SELECT count(*) FROM points where user_id = ? and eventid = ?")
 	if err != nil {
 		//	log.Fatal(err)
 		log.Printf("err=[%s]\n", err.Error())
@@ -274,7 +275,7 @@ func SelectPointList(userno int, eventid string) (norow int, tp *[]time.Time, pp
 	//	----------------------------------------------------
 
 	//	stmt1, err = Db.Prepare("SELECT max(t.t) FROM timeacq t join points p where t.idx=p.idx and user_id = ? and event_id = ?")
-	stmt1, err = Db.Prepare("SELECT max(ts) FROM points where user_id = ? and eventid = ?")
+	stmt1, err = db.Prepare("SELECT max(ts) FROM points where user_id = ? and eventid = ?")
 	if err != nil {
 		//	log.Fatal(err)
 		log.Printf("err=[%s]\n", err.Error())
@@ -316,7 +317,7 @@ func SelectPointList(userno int, eventid string) (norow int, tp *[]time.Time, pp
 	//	----------------------------------------------------
 
 	//	stmt2, err := Db.Prepare("select t.t, p.point from points p join timeacq t on t.idx = p.idx where user_id = ? and event_id = ? order by t.t")
-	stmt2, err := Db.Prepare("select ts, point from points where user_id = ? and eventid = ? order by ts")
+	stmt2, err := db.Prepare("select ts, point from points where user_id = ? and eventid = ? order by ts")
 	if err != nil {
 		//	log.Fatal(err)
 		log.Printf("err=[%s]\n", err.Error())
@@ -364,6 +365,7 @@ func SelectPointList(userno int, eventid string) (norow int, tp *[]time.Time, pp
 }
 
 func UpdatePointsSetQstatus(
+	db *sql.DB,
 	eventid string,
 	userno int,
 	tstart string,
@@ -377,7 +379,7 @@ func UpdatePointsSetQstatus(
 	nrow := 0
 	//	err := Db.QueryRow("select count(*) from points where eventid = ? and user_id = ? and pstatus = 'Conf.'", eventid, userno).Scan(&nrow)
 	sql := "select count(*) from points where eventid = ? and user_id = ? and ( pstatus = 'Conf.' or pstatus = 'Prov.' )"
-	err := Db.QueryRow(sql, eventid, userno).Scan(&nrow)
+	err := db.QueryRow(sql, eventid, userno).Scan(&nrow)
 
 	if err != nil {
 		log.Printf("select count(*) from user ... err=[%s]\n", err.Error())
@@ -395,7 +397,7 @@ func UpdatePointsSetQstatus(
 	sql += "qtime=? "
 	//	sql += "where user_id=? and eventid = ? and pstatus = 'Conf.'"
 	sql += "where user_id=? and eventid = ? and ( pstatus = 'Conf.' or pstatus = 'Prov.' )"
-	stmt, err := Db.Prepare(sql)
+	stmt, err := db.Prepare(sql)
 	if err != nil {
 		log.Printf("UpdatePointsSetQstatus() Update/Prepare err=%s\n", err.Error())
 		status = -1
@@ -413,7 +415,7 @@ func UpdatePointsSetQstatus(
 	return
 }
 
-func MakePointPerSlot(tevent, eventid string) (perslotinflist []PerSlotInf, status int) {
+func MakePointPerSlot(db *sql.DB, tevent, eventid string) (perslotinflist []PerSlotInf, status int) {
 
 	var perslotinf PerSlotInf
 	//	var event_inf exsrapi.Event_Inf
@@ -422,11 +424,11 @@ func MakePointPerSlot(tevent, eventid string) (perslotinflist []PerSlotInf, stat
 
 	//	event_inf.Event_ID = eventid
 	//	eventno, eventname, period := SelectEventNoAndName(eventid)
-	eventname, period, _ := SelectEventNoAndName(tevent, eventid)
+	eventname, period, _ := SelectEventNoAndName(db, tevent, eventid)
 
 	var roominfolist RoomInfoList
 
-	_, sts := SelectEventRoomInfList(tevent, eventid, &roominfolist)
+	_, sts := SelectEventRoomInfList(db, tevent, eventid, &roominfolist)
 
 	if sts != 0 {
 		log.Printf("status of SelectEventRoomInfList() =%d\n", sts)
@@ -452,7 +454,7 @@ func MakePointPerSlot(tevent, eventid string) (perslotinflist []PerSlotInf, stat
 		perslotinf.Roomid = userid
 		perslotinf.Perslotlist = make([]PerSlot, 0)
 
-		norow, tp, pp := SelectPointList(userid, eventid)
+		norow, tp, pp := SelectPointList(db, userid, eventid)
 
 		if norow == 0 {
 			continue
@@ -537,7 +539,7 @@ func MakePointPerSlot(tevent, eventid string) (perslotinflist []PerSlotInf, stat
 			perslotinflist = append(perslotinflist, perslotinf)
 		}
 
-		UpdatePointsSetQstatus(eventid, userid, perslot.Tstart, perslot.Tend, perslot.Point)
+		UpdatePointsSetQstatus(db, eventid, userid, perslot.Tstart, perslot.Tend, perslot.Point)
 
 	}
 

@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-gorp/gorp"
 	"net/http"
-	//	"github.com/go-gorp/gorp"
 	//	"github.com/dustin/go-humanize"
 )
 
@@ -43,7 +43,7 @@ type ViewerHistory struct {
 /*
 テーブルviewerにリスナーの新規登録（あるいは更新登録）を行う
 */
-func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer) (
+func UpinsViewerSetProperty(dbmap *gorp.DbMap, client *http.Client, tnow time.Time, viewer *Viewer) (
 	err error,
 ) {
 
@@ -56,10 +56,10 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer)
 		既存のvieweridの場合は更新、新規の場合は新規作成
 	*/
 
-	intfc, err := Dbmap.Get(Viewer{}, viewer.Viewerid)
+	intfc, err := dbmap.Get(Viewer{}, viewer.Viewerid)
 	if err != nil {
-		err = fmt.Errorf("Dbmap.Get(Viewer,UserID) error: %v", err)
-		log.Printf("Dbmap.Get error: %v", err)
+		err = fmt.Errorf("dbmap.Get(Viewer,UserID) error: %v", err)
+		log.Printf("dbmap.Get error: %v", err)
 		return err
 	}
 
@@ -68,7 +68,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer)
 	if intfc == nil {
 		//	viewerにviewerid　のデータが見つからない場合は新たに作成する
 		vw = viewer
-		err = Dbmap.Insert(vw)
+		err = dbmap.Insert(vw)
 		if err != nil {
 			err = fmt.Errorf("Dbmap.Insert error: %v", err)
 			log.Printf("error: %v", err)
@@ -83,7 +83,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer)
 			Sname:    viewer.Sname,
 			Ts:       tnow,
 		}
-		err = Dbmap.Insert(vwh)
+		err = dbmap.Insert(vwh)
 		if err != nil {
 			err = fmt.Errorf("Dbmap.Insert error: %v", err)
 			log.Printf("error: %v", err)
@@ -98,7 +98,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer)
 		nodata := false
 		vh := ViewerHistory{} //	指定したviewidの最後のデータのTsのみが格納される
 		sqlst := "select max(ts) ts from viewerhistory where viewerid = ? "
-		err = Dbmap.SelectOne(&vh, sqlst, vw.Viewerid)
+		err = dbmap.SelectOne(&vh, sqlst, vw.Viewerid)
 		if err != nil {
 			//	log.Printf("<%s>\n", err.Error())
 			if !strings.Contains(err.Error(), "sql: Scan error on column index 0, name \"ts\": unsupported Scan") {
@@ -111,7 +111,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer)
 
 		pintf := any(nil)
 		if !nodata {
-			pintf, err = Dbmap.Get(ViewerHistory{}, vw.Viewerid, vh.Ts)
+			pintf, err = dbmap.Get(ViewerHistory{}, vw.Viewerid, vh.Ts)
 			if err != nil {
 				err = fmt.Errorf("Dbmap.Get error: %v", err)
 				log.Printf("error: %v", err)
@@ -131,7 +131,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer)
 				Sname:    viewer.Name,
 				Ts:       tnow,
 			}
-			err = Dbmap.Insert(vwh)
+			err = dbmap.Insert(vwh)
 			if err != nil {
 				err = fmt.Errorf("Dbmap.Insert error: %v", err)
 				log.Printf("error: %v", err)
@@ -141,7 +141,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer)
 		} else if tnow.Sub(vwh.Ts) > time.Duration(Env.Lmin)*time.Minute && vwh.Name != viewer.Name {
 			vw.Name = viewer.Name
 			vw.Ts = tnow
-			_, err = Dbmap.Update(vw)
+			_, err = dbmap.Update(vw)
 			if err != nil {
 				err = fmt.Errorf("Dbmap.Update error: %v", err)
 				log.Printf("error: %v", err)
@@ -153,7 +153,7 @@ func UpinsViewerSetProperty(client *http.Client, tnow time.Time, viewer *Viewer)
 			vwh.Name = viewer.Name
 			vwh.Sname = viewer.Sname
 			vwh.Ts = tnow
-			err = Dbmap.Insert(vwh)
+			err = dbmap.Insert(vwh)
 			if err != nil {
 				err = fmt.Errorf("Dbmap.Insert(vwh) error: %v", err)
 				log.Printf("error: %v", err)

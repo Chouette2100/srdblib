@@ -90,9 +90,10 @@ import (
 200801  v2、v3を並行して進めるための準備。v3では複数データベースサーバーに対応する。
 200802  go.modの誤り（Chouette2100.com）を修正する。
 300000  v3を新たに作成する。v2.8.2をベースとする。
+300100  複数データベースサーバーに対応するための機能を追加する。
 */
 
-const Version = "300000"
+const Version = "301000"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

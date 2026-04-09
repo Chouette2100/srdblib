@@ -46,7 +46,7 @@ func TestInserIntoGiftScore(t *testing.T) {
 	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
 
 	//      データベースとの接続をオープンする。
-	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
+	db, dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		log.Printf("srdblib.OpenDb() error. err=%s.\n", err.Error())
 		return
@@ -54,7 +54,7 @@ func TestInserIntoGiftScore(t *testing.T) {
 	if dbconfig.UseSSH {
 		defer srdblib.Dialer.Close()
 	}
-	defer srdblib.Db.Close()
+	defer db.Close()
 	log.Printf("dbconfig=%v\n", dbconfig)
 
 	//	srdblib.Tevent = "wevent"
@@ -63,7 +63,8 @@ func TestInserIntoGiftScore(t *testing.T) {
 	//	srdblib.Tuserhistory = "wuserhistory"
 
 	dial := gorp.MySQLDialect{Engine: "InnoDB", Encoding: "utf8mb4"}
-	srdblib.Dbmap = &gorp.DbMap{Db: srdblib.Db, Dialect: dial, ExpandSliceArgs: true}
+	var dbmap *gorp.DbMap
+	dbmap = &gorp.DbMap{Db: db, Dialect: dial, ExpandSliceArgs: true}
 	/*
 		//	srdblib.Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
 		//	srdblib.Dbmap.AddTableWithName(srdblib.Userhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
@@ -76,7 +77,7 @@ func TestInserIntoGiftScore(t *testing.T) {
 		Dbmap.AddTableWithName(ViewerGiftScore{}, "viewergiftscore").SetKeys(false, "Giftid", "Ts", "Viewerid")
 	*/
 
-	srdblib.AddTableWithName()
+	srdblib.AddTableWithName(dbmap)
 
 	//      cookiejarがセットされたHTTPクライアントを作る
 	client, jar, err := exsrapi.CreateNewClient("ShowroomCGI")
@@ -111,7 +112,7 @@ func TestInserIntoGiftScore(t *testing.T) {
 			name: "test",
 			args: args{
 				client: client,
-				dbmap:  srdblib.Dbmap,
+				dbmap:  dbmap,
 				giftid: 1,
 				cgr:    cgr,
 				idx:    1,
@@ -149,7 +150,7 @@ func TestInserIntoViewerGiftScore(t *testing.T) {
 	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
 
 	//      データベースとの接続をオープンする。
-	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
+	db, dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		log.Printf("srdblib.OpenDb() error. err=%s.\n", err.Error())
 		return
@@ -157,7 +158,7 @@ func TestInserIntoViewerGiftScore(t *testing.T) {
 	if dbconfig.UseSSH {
 		defer srdblib.Dialer.Close()
 	}
-	defer srdblib.Db.Close()
+	defer db.Close()
 	log.Printf("dbconfig=%v\n", dbconfig)
 
 	//	srdblib.Tevent = "wevent"
@@ -166,21 +167,22 @@ func TestInserIntoViewerGiftScore(t *testing.T) {
 	//	srdblib.Tuserhistory = "wuserhistory"
 
 	dial := gorp.MySQLDialect{Engine: "InnoDB", Encoding: "utf8mb4"}
-	srdblib.Dbmap = &gorp.DbMap{Db: srdblib.Db, Dialect: dial, ExpandSliceArgs: true}
+	var dbmap *gorp.DbMap
+	dbmap = &gorp.DbMap{Db: db, Dialect: dial, ExpandSliceArgs: true}
 	/*
 		//	Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
 		//	Dbmap.AddTableWithName(srdblib.Userhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
 		//	Dbmap.AddTableWithName(srdblib.Event{}, "wevent").SetKeys(false, "Eventid")
 		//	Dbmap.AddTableWithName(srdblib.Eventuser{}, "weventuser").SetKeys(false, "Eventid", "Userno")
 		//	Dbmap.AddTableWithName(Event{}, "event").SetKeys(false, "Eventid")
-		Dbmap.AddTableWithName(User{}, "user").SetKeys(false, "Userno")
-		Dbmap.AddTableWithName(GiftScore{}, "giftscore").SetKeys(false, "Giftid", "Ts", "Userno")
-		Dbmap.AddTableWithName(Viewer{}, "viewer").SetKeys(false, "Viewerid")
-		Dbmap.AddTableWithName(ViewerHistory{}, "viewerhistory").SetKeys(false, "Viewerid", "Ts")
-		Dbmap.AddTableWithName(ViewerGiftScore{}, "viewergiftscore").SetKeys(false, "Giftid", "Ts", "Viewerid")
+		dbmap.AddTableWithName(User{}, "user").SetKeys(false, "Userno")
+		dbmap.AddTableWithName(GiftScore{}, "giftscore").SetKeys(false, "Giftid", "Ts", "Userno")
+		dbmap.AddTableWithName(Viewer{}, "viewer").SetKeys(false, "Viewerid")
+		dbmap.AddTableWithName(ViewerHistory{}, "viewerhistory").SetKeys(false, "Viewerid", "Ts")
+		dbmap.AddTableWithName(ViewerGiftScore{}, "viewergiftscore").SetKeys(false, "Giftid", "Ts", "Viewerid")
 	*/
 
-	srdblib.AddTableWithName()
+	srdblib.AddTableWithName(dbmap)
 
 	//      cookiejarがセットされたHTTPクライアントを作る
 	client, jar, err := exsrapi.CreateNewClient("ShowroomCGI")
@@ -213,7 +215,7 @@ func TestInserIntoViewerGiftScore(t *testing.T) {
 			name: "test",
 			args: args{
 				client: client,
-				dbmap:  srdblib.Dbmap,
+				dbmap:  dbmap,
 				giftid: 206,
 				cugr:   cugr,
 				idx:    0,

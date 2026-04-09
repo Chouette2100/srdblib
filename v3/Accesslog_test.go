@@ -74,7 +74,7 @@ func TestGetFeaturedEvents(t *testing.T) {
 	}
 	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
 
-	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
+	db, dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		t.Errorf("Database error. err = %v\n", err)
 		log.Printf("Database error. err = %v\n", err)
@@ -83,16 +83,17 @@ func TestGetFeaturedEvents(t *testing.T) {
 	if dbconfig.UseSSH {
 		defer srdblib.Dialer.Close()
 	}
-	defer srdblib.Db.Close()
+	defer db.Close()
 
 	dial := gorp.MySQLDialect{Engine: "InnoDB", Encoding: "utf8mb4"}
-	srdblib.Dbmap = &gorp.DbMap{Db: srdblib.Db, Dialect: dial, ExpandSliceArgs: true}
+	var dbmap *gorp.DbMap
+	dbmap = &gorp.DbMap{Db: db, Dialect: dial, ExpandSliceArgs: true}
 
 	log.Printf("dbconfig = %+v\n", dbconfig)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotEvents, _ := srdblib.GetFeaturedEvents(tt.args.mode, tt.args.hours, tt.args.num, tt.args.lmct); !reflect.DeepEqual(gotEvents, tt.wantEvents) {
+			if gotEvents, _ := srdblib.GetFeaturedEvents(dbmap, tt.args.mode, tt.args.hours, tt.args.num, tt.args.lmct); !reflect.DeepEqual(gotEvents, tt.wantEvents) {
 				t.Errorf("GetFeaturedEvents() = %v, want %v", gotEvents, tt.wantEvents)
 			} else {
 				t.Logf("GetFeaturedEvents() = %v, want %v", gotEvents, tt.wantEvents)

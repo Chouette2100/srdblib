@@ -16,6 +16,7 @@ import (
 
 	//	"github.com/go-gorp/gorp"
 	//      "gopkg.in/gorp.v2"
+	"github.com/go-gorp/gorp"
 
 	"github.com/dustin/go-humanize"
 	"github.com/jinzhu/copier"
@@ -111,6 +112,7 @@ func (twu *Wuser) Set(nu *User) (err error) {
 
 // userとtwuserのデータをデータベースから取得し、新しいデータを返す
 func GetLastUserdata[T UserT](
+	dbmap *gorp.DbMap,
 	xuser T,
 ) (
 	estatus int,
@@ -132,7 +134,7 @@ func GetLastUserdata[T UserT](
 	var verr, terr error
 	var next UserT
 
-	vdata, verr = GetUserOrWuserData(xuser)
+	vdata, verr = GetUserOrWuserData(dbmap, xuser)
 	switch any(xuser).(type) {
 	case *User:
 		// vdata, verr, tdata, terr = getUserdataWithOtheruserdata(xuser, &Wuser{})
@@ -164,7 +166,7 @@ func GetLastUserdata[T UserT](
 
 	// if estatus < 2 {
 	// TODO: ここで上で取得しなかったデータを取得すべき
-	tdata, terr = GetUserOrWuserData(next)
+	tdata, terr = GetUserOrWuserData(dbmap, next)
 	if terr != nil {
 		// userテーブルのデータが取得できない
 		err = fmt.Errorf("Get(%d): database access error", userno)
@@ -195,6 +197,7 @@ func GetLastUserdata[T UserT](
 // 存在するときは そのデータがlimin分より古ければAPIでユーザ情報取得して既存のデータを更新する。
 // xuser は xuser.Userno のみが使用される。
 func UpinsUser[T UserT](
+	dbmap *gorp.DbMap,
 	client *http.Client,
 	tnow time.Time,
 	xuser T, // xuser.Userno が使用される。更新対象がuserであるかtwuserであるかを判定するためにxuserが使用される。
@@ -209,7 +212,7 @@ func UpinsUser[T UserT](
 	var estatus int
 	var user User
 	copier.Copy(&user, xuser)
-	estatus, vdata, err = GetLastUserdata(xuser)
+	estatus, vdata, err = GetLastUserdata(dbmap, xuser)
 	if err != nil {
 		err = fmt.Errorf("GetLastUserdata(userno=%d) returned error. %w", user.Userno, err)
 		return
@@ -217,25 +220,25 @@ func UpinsUser[T UserT](
 	switch estatus {
 	case 0: // データが存在せず、もうひとつのテーブルのデータも存在しないか古いのでAPIでデータを取得して挿入する。
 		// vdata, err = InsertIntoUser(client, tnow, user.Userno)
-		rxuser, err = InsertUsertable(client, tnow, xuser)
+		rxuser, err = InsertUsertable(dbmap, client, tnow, xuser)
 		if err != nil {
 			err = fmt.Errorf("InsertIntoUser(userno=%d) returned error. %w", user.Userno, err)
 			return
 		}
-		InsertUserhistory(&Userhistory{}, vdata)
+		InsertUserhistory(dbmap, &Userhistory{}, vdata)
 	case 1: // データが古く、もうひとつのテーブルのデータも存在しないか古いのでAPIでデータを取得して更新する。
 		copier.Copy(xuser, vdata)
-		rxuser, err = UpdateUsertable(client, tnow, xuser)
+		rxuser, err = UpdateUsertable(dbmap, client, tnow, xuser)
 		if err != nil {
 			err = fmt.Errorf("Dbmap.Insert(userno=%d) returned error. %w", user.Userno, err)
 			return
 		}
 	case 2: // データが存在しないが、もうひとつのテーブルに新しいデータがあるのでそれを挿入する。
 		copier.Copy(xuser, vdata)
-		err = Dbmap.Insert(xuser)
+		err = dbmap.Insert(xuser)
 	case 3: // データが古いが、もうひとつのテーブルに新しいデータがあるのでそれで更新する。
 		copier.Copy(xuser, vdata)
-		_, err = Dbmap.Update(xuser)
+		_, err = dbmap.Update(xuser)
 	case 4: // 新しめのデータが存在する。更新は必要ない。
 		log.Printf("UpinsUser() user=%+v is up to date\n", user.Userno)
 	default:
@@ -244,7 +247,7 @@ func UpinsUser[T UserT](
 	if estatus < 2 {
 		switch any(xuser).(type) {
 		case *User, User, *Wuser, Wuser:
-			InsertUserhistory(&Userhistory{}, vdata)
+			InsertUserhistory(dbmap, &Userhistory{}, vdata)
 		default:
 			log.Printf("UpinsUser() InsertUserhistory() not executed\n")
 		}
@@ -289,15 +292,16 @@ func UpinsUser[T UserT](
 
 // テーブル user からデータを取得する。
 func SelectUserdata[T UserT](xu T, userno int) (
+	dbmap *gorp.DbMap,
 	result *T,
 	err error,
 ) {
 
 	var intf any
 
-	intf, err = Dbmap.Get(xu, userno)
+	intf, err = dbmap.Get(xu, userno)
 	if err != nil {
-		err = fmt.Errorf("Dbmap.Get failed: %w", err)
+		err = fmt.Errorf("dbmap.Get failed: %w", err)
 		return
 	} else if intf == nil {
 		result = nil
@@ -325,7 +329,7 @@ func UpdateUsertable[T UserT](xu T) (err error) {
 */
 
 // SHOWROOMのAPI api/roomprofile を使って得られる情報でユーザテーブルを更新する。
-func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, xuser T) (
+func UpdateUsertable[T UserT](dbmap *gorp.DbMap, client *http.Client, tnow time.Time, xuser T) (
 	rxuser *T,
 	err error,
 ) {
@@ -412,7 +416,7 @@ func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, xuser T) (
 	xuser.Set(tuser)
 	rxuser = new(T)
 	*rxuser = xuser
-	_, err = Dbmap.Update(xuser)
+	_, err = dbmap.Update(xuser)
 	if err != nil {
 		log.Printf("error! %v", err)
 		return
@@ -426,6 +430,7 @@ func UpdateUsertable[T UserT](client *http.Client, tnow time.Time, xuser T) (
 
 // APIで UserT.Userno の ユーザ情報を取得し、ユーザテーブルに新しいデータを挿入する。
 func InsertUsertable[T UserT](
+	dbmap *gorp.DbMap,
 	client *http.Client,
 	tnow time.Time,
 	xuser T,
@@ -511,7 +516,7 @@ func InsertUsertable[T UserT](
 
 	//	cnt, err := Dbmap.Update(user)
 	xuser.Set(user)
-	err = Dbmap.Insert(xuser)
+	err = dbmap.Insert(xuser)
 	if err != nil {
 		log.Printf("error! %v", err)
 		return
@@ -525,13 +530,13 @@ func InsertUsertable[T UserT](
 }
 
 // func getUserdataWithOtheruserdata(user1 UserT, user2 UserT) (vdata *User, verr error, tdata *User, terr error) {
-func GetUserOrWuserData(user1 UserT) (vdata *User, verr error) {
+func GetUserOrWuserData(dbmap *gorp.DbMap, user1 UserT) (vdata *User, verr error) {
 
 	cuser, _ := user1.Get()
 	var intf1 any
 	// var intf1, intf2 interface{}
 
-	intf1, verr = Dbmap.Get(user1, cuser.Userno)
+	intf1, verr = dbmap.Get(user1, cuser.Userno)
 	if verr == nil && intf1 != nil {
 		vdata, _ = any(intf1).(UserT).Get()
 	}

@@ -13,6 +13,7 @@ import (
 
 // 指定した条件に該当するイベントのリストを作る。
 func SelectEventinflistFromEvent(
+	db *sql.DB,
 	cond int, // 抽出条件	-1:終了したイベント、0: 開催中のイベント、1: 開催予定のイベント、 99: すべて
 	keyword string, // イベント名検索キーワード
 	offset int,
@@ -55,7 +56,7 @@ func SelectEventinflistFromEvent(
 
 	//	log.Printf("sql=[%s]\n", sqls)
 	var stmts *sql.Stmt
-	stmts, err = Db.Prepare(sqls)
+	stmts, err = db.Prepare(sqls)
 	if err != nil {
 		err = fmt.Errorf("Prepare(sqls): %w", err)
 		return

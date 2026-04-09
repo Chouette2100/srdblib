@@ -82,7 +82,7 @@ func TestSelectFromEvent(t *testing.T) {
 	}
 	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
 
-	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
+	db, dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		t.Errorf("Database error. err = %v\n", err)
 		log.Printf("Database error. err = %v\n", err)
@@ -91,13 +91,13 @@ func TestSelectFromEvent(t *testing.T) {
 	if dbconfig.UseSSH {
 		defer srdblib.Dialer.Close()
 	}
-	defer srdblib.Db.Close()
+	defer db.Close()
 
 	log.Printf("dbconfig = %+v\n", dbconfig)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotPeventinf, err := srdblib.SelectFromEvent(tt.args.tevent, tt.args.eventid)
+			gotPeventinf, err := srdblib.SelectFromEvent(db, tt.args.tevent, tt.args.eventid)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("SelectFromEvent() error = %v, wantErr %v", err, tt.wantErr)
 				return

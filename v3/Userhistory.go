@@ -5,6 +5,8 @@ import (
 	"github.com/jinzhu/copier"
 	"log"
 	"time"
+
+	"github.com/go-gorp/gorp"
 )
 
 // userの履歴を保存する構造体
@@ -61,13 +63,14 @@ func (wh *Wuserhistory) Set(nwh *User) (err error) {
 
 // userデータをuserhistory, wuserhistoryにinsertする。
 func InsertUserhistory[T UserhistoryT](
+	dbmap *gorp.DbMap,
 	xuserhistory T, user *User,
 ) (
 	err error,
 ) {
 	log.Printf("InsertUserhistory: user=%+v\n", user)
 	xuserhistory.Set(user)
-	err = Dbmap.Insert(xuserhistory)
+	err = dbmap.Insert(xuserhistory)
 	if err != nil {
 		err = fmt.Errorf("Dbmap.Insert failed: %w", err)
 	}

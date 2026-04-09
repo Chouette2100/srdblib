@@ -12,6 +12,7 @@ import (
 
 // DBから現在開催中のイベントを抜き出す
 func SelectCurEventList() (
+	db *sql.DB,
 	eventlist []exsrapi.Event_Inf,
 	err error,
 ) {
@@ -22,7 +23,7 @@ func SelectCurEventList() (
 	sqls := "select e.eventid, e.event_name, e.period, e.starttime, e.endtime, e.fromorder, e.toorder "
 	sqls += "from event e join wevent we on e.eventid = we.eventid "
 	sqls += " where e.endtime > now() and e.starttime < now()  and we.achk = 0"
-	stmt, err = Db.Prepare(sqls)
+	stmt, err = db.Prepare(sqls)
 	if err != nil {
 		log.Printf("err=[%s]\n", err.Error())
 		err = fmt.Errorf("Db.Prepare(sqls): %w", err)

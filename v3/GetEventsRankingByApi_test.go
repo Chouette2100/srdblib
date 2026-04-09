@@ -34,7 +34,7 @@ func TestGetEventsRankingByApi(t *testing.T) {
 	log.SetOutput(io.MultiWriter(logfile, os.Stdout))
 
 	//      データベースとの接続をオープンする。
-	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
+	db, dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		log.Printf("srdblib.OpenDb() error. err=%s.\n", err.Error())
 		return
@@ -42,7 +42,7 @@ func TestGetEventsRankingByApi(t *testing.T) {
 	if dbconfig.UseSSH {
 		defer srdblib.Dialer.Close()
 	}
-	defer srdblib.Db.Close()
+	defer db.Close()
 
 	log.Printf("dbconfig=%v\n", dbconfig)
 
@@ -52,12 +52,13 @@ func TestGetEventsRankingByApi(t *testing.T) {
 	//	srdblib.Tuserhistory = "wuserhistory"
 
 	dial := gorp.MySQLDialect{Engine: "InnoDB", Encoding: "utf8mb4"}
-	srdblib.Dbmap = &gorp.DbMap{Db: srdblib.Db, Dialect: dial, ExpandSliceArgs: true}
+	var dbmap *gorp.DbMap
+	dbmap = &gorp.DbMap{Db: db, Dialect: dial, ExpandSliceArgs: true}
 	//	srdblib.Dbmap.AddTableWithName(srdblib.Wuser{}, "wuser").SetKeys(false, "Userno")
 	//	srdblib.Dbmap.AddTableWithName(srdblib.Userhistory{}, "wuserhistory").SetKeys(false, "Userno", "Ts")
 	//	srdblib.Dbmap.AddTableWithName(srdblib.Event{}, "wevent").SetKeys(false, "Eventid")
 	//	srdblib.Dbmap.AddTableWithName(srdblib.Eventuser{}, "weventuser").SetKeys(false, "Eventid", "Userno")
-	srdblib.Dbmap.AddTableWithName(srdblib.Event{}, "event").SetKeys(false, "Eventid")
+	dbmap.AddTableWithName(srdblib.Event{}, "event").SetKeys(false, "Eventid")
 
 	//      cookiejarがセットされたHTTPクライアントを作る
 	client, jar, err := exsrapi.CreateNewClient("ShowroomCGI")
@@ -129,7 +130,7 @@ func TestGetEventsRankingByApi(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotPranking, err := srdblib.GetEventsRankingByApi(tt.args.client, tt.args.eid, tt.args.mode)
+			gotPranking, err := srdblib.GetEventsRankingByApi(dbmap, tt.args.client, tt.args.eid, tt.args.mode)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetEventsRankingByApi() error = %v, wantErr %v", err, tt.wantErr)
 				return

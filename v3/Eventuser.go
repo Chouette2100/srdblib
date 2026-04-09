@@ -9,6 +9,7 @@ import (
 	"time"
 
 	// "net/http"
+	"github.com/go-gorp/gorp"
 
 	"github.com/jinzhu/copier"
 	// "github.com/mitchellh/copystructure"
@@ -93,14 +94,14 @@ func (e *Weventuser) Set(ne *Eventuser) (err error) {
 // 	fmt.Printf("Wventuser: %+v\n", e)
 // }
 
-func SelectEudata[T EventuserR](xeu *T, eventid string, userno int) (
+func SelectEudata[T EventuserR](dbmap *gorp.DbMap, xeu *T, eventid string, userno int) (
 	result *T,
 	err error,
 ) {
 
 	var intf any
 
-	intf, err = Dbmap.Get(xeu, eventid, userno)
+	intf, err = dbmap.Get(xeu, eventid, userno)
 	if err != nil {
 		err = fmt.Errorf("Dbmap.Get failed: %w", err)
 		return
@@ -116,10 +117,10 @@ func SelectEudata[T EventuserR](xeu *T, eventid string, userno int) (
 	return
 }
 
-func UpdateEutable[T EventuserR](xeu T) (err error) {
+func UpdateEutable[T EventuserR](dbmap *gorp.DbMap, xeu T) (err error) {
 
 	var nr int64
-	nr, err = Dbmap.Update(xeu)
+	nr, err = dbmap.Update(xeu)
 	if err != nil {
 		err = fmt.Errorf("Dbmap.Update failed: %w", err)
 	} else if nr != 1 {
@@ -128,13 +129,13 @@ func UpdateEutable[T EventuserR](xeu T) (err error) {
 	return
 }
 
-func InsertEutable[T EventuserR](xeu T) (err error) {
-	err = Dbmap.Insert(xeu)
+func InsertEutable[T EventuserR](dbmap *gorp.DbMap, xeu T) (err error) {
+	err = dbmap.Insert(xeu)
 	return
 }
 
 // イベント最終結果（確定結果）をeventuserテーブルに格納する（既存の場合は更新する）
-func UpinsEventuserG[T EventuserR](xeu T, tnow time.Time) (err error) {
+func UpinsEventuserG[T EventuserR](dbmap *gorp.DbMap, xeu T, tnow time.Time) (err error) {
 
 	// イベントユーザー情報を取得する
 	var teu *Eventuser
@@ -147,7 +148,7 @@ func UpinsEventuserG[T EventuserR](xeu T, tnow time.Time) (err error) {
 	// xeu.Print()
 	eventid := teu.Eventid
 	userno := teu.Userno
-	cxeu, err = SelectEudata(&xeu, eventid, userno)
+	cxeu, err = SelectEudata(dbmap, &xeu, eventid, userno)
 	if err != nil {
 		err = fmt.Errorf("Dbmap.Get failed: %w", err)
 		return
@@ -174,7 +175,7 @@ func UpinsEventuserG[T EventuserR](xeu T, tnow time.Time) (err error) {
 			teu.Vld = -1
 		}
 		xeu.Set(teu)
-		err = InsertEutable(xeu)
+		err = InsertEutable(dbmap, xeu)
 		if err != nil {
 			err = fmt.Errorf("InsertEutable failed: %w", err)
 			return
@@ -223,7 +224,7 @@ func UpinsEventuserG[T EventuserR](xeu T, tnow time.Time) (err error) {
 		// }
 
 		xeu.Set(teu)
-		err = UpdateEutable(xeu)
+		err = UpdateEutable(dbmap, xeu)
 		if err != nil {
 			err = fmt.Errorf("UpdateEutable failed: %w", err)
 			return

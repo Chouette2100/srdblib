@@ -43,7 +43,7 @@ func TestUpinsEventuser(t *testing.T) {
 		},
 	}
 	// データベース接続
-	dbconfig, err := srdblib.OpenDb("DBConfig.yml")
+	db, dbconfig, err := srdblib.OpenDb("DBConfig.yml")
 	if err != nil {
 		log.Printf("Database error. err = %v\n", err)
 		return
@@ -51,10 +51,10 @@ func TestUpinsEventuser(t *testing.T) {
 	if dbconfig.UseSSH {
 		defer srdblib.Dialer.Close()
 	}
-	defer srdblib.Db.Close()
+	defer db.Close()
 
 	dial := gorp.MySQLDialect{Engine: "InnoDB", Encoding: "utf8mb4"}
-	srdblib.Dbmap = &gorp.DbMap{Db: srdblib.Db,
+	dbmap := &gorp.DbMap{Db: db,
 		Dialect:         dial,
 		ExpandSliceArgs: true, //スライス引数展開オプションを有効化する
 	}
@@ -69,11 +69,11 @@ func TestUpinsEventuser(t *testing.T) {
 		Dbmap.AddTableWithName(Wevent{}, "wevent").SetKeys(false, "Eventid")
 		Dbmap.AddTableWithName(Weventuser{}, "weventuser").SetKeys(false, "Eventid", "Userno")
 	*/
-	srdblib.AddTableWithName()
+	srdblib.AddTableWithName(dbmap)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := srdblib.UpinsEventuserG(&tt.args.weu, tt.args.tnow); (err != nil) != tt.wantErr {
+			if err := srdblib.UpinsEventuserG(dbmap, &tt.args.weu, tt.args.tnow); (err != nil) != tt.wantErr {
 				t.Errorf("UpinsEventuser() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

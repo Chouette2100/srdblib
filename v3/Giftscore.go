@@ -75,12 +75,11 @@ func InserIntoViewerGiftScore(
 	vw.Viewerid = cugr.UserID
 	vw.Name = cugr.User.Name
 
-	err = UpinsViewerSetProperty(client, tnow, vw)
+	err = UpinsViewerSetProperty(dbmap, client, tnow, vw)
 	if err != nil {
 		err = fmt.Errorf("UpinsViewerSetProperty error: %v", err)
 		return
 	}
-
 
 	//	ユーザーギフトランキングを格納する
 	vgs := &ViewerGiftScore{
@@ -92,7 +91,7 @@ func InserIntoViewerGiftScore(
 		Ts:       tnow,
 	}
 
-	err = Dbmap.Insert(vgs)
+	err = dbmap.Insert(vgs)
 	if err != nil {
 		err = fmt.Errorf("ViewrGiftScore error: %v", err)
 		log.Printf("error: %v", err)
@@ -120,7 +119,7 @@ func InserIntoGiftScore(
 	user.Userno = cgr.RoomID
 	//	err = UpinsUserSetProperty(client, tnow, user, 1440*7, 100)
 	// err = UpinsUserSetProperty(client, tnow, user, Env.Lmin, Env.Waitmsec)
-	_, err = UpinsUser(client, tnow, user)
+	_, err = UpinsUser(dbmap, client, tnow, user)
 	if err != nil {
 		err = fmt.Errorf("UpinsUserSetProperty error: %v", err)
 		log.Printf("UpinsUserSetProperty error: %v", err)
@@ -144,7 +143,6 @@ func InserIntoGiftScore(
 	return
 }
 
-
 // ギフトランキング・リスナー貢献ランキングデータを格納する
 // 必要に応じてリスナー（viewer）の情報を新たに作る、あるいは更新する。
 func InserIntoGiftScoreCntrb(
@@ -162,12 +160,11 @@ func InserIntoGiftScoreCntrb(
 	vw.Viewerid = grc.UserID
 	vw.Name = grc.User.Name
 
-	err = UpinsViewerSetProperty(client, tnow, vw)
+	err = UpinsViewerSetProperty(dbmap, client, tnow, vw)
 	if err != nil {
 		err = fmt.Errorf("UpinsViewerSetProperty error: %v", err)
 		return
 	}
-
 
 	//	ユーザーギフトランキングを格納する
 	vgs := &GiftScoreCntrb{
@@ -179,7 +176,7 @@ func InserIntoGiftScoreCntrb(
 		Ts:       tnow,
 	}
 
-	err = Dbmap.Insert(vgs)
+	err = dbmap.Insert(vgs)
 	if err != nil {
 		err = fmt.Errorf("ViewrGiftScore error: %v", err)
 		log.Printf("error: %v", err)
@@ -189,4 +186,3 @@ func InserIntoGiftScoreCntrb(
 
 	return
 }
-

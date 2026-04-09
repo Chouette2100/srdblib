@@ -1,10 +1,13 @@
 package srdblib
+
 import (
-	"time"
-	"strconv"
+	"database/sql"
 	"log"
+	"strconv"
+	"time"
 )
-func InsertIntoOrUpdateUser(tnow time.Time, eventid string, roominf RoomInfo) (status int) {
+
+func InsertIntoOrUpdateUser(db *sql.DB, tnow time.Time, eventid string, roominf RoomInfo) (status int) {
 
 	status = 0
 
@@ -14,7 +17,7 @@ func InsertIntoOrUpdateUser(tnow time.Time, eventid string, roominf RoomInfo) (s
 	//	log.Printf("  *** InsertIntoOrUpdateUser() *** userno=%d\n", userno)
 
 	nrow := 0
-	err := Db.QueryRow("select count(*) from user where userno =" + roominf.ID).Scan(&nrow)
+	err := db.QueryRow("select count(*) from user where userno =" + roominf.ID).Scan(&nrow)
 
 	if err != nil {
 		log.Printf("select count(*) from user ... err=[%s]\n", err.Error())
@@ -43,7 +46,7 @@ func InsertIntoOrUpdateUser(tnow time.Time, eventid string, roominf RoomInfo) (s
 		sql += " VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
 		//	log.Printf("sql=%s\n", sql)
-		stmt, err := Db.Prepare(sql)
+		stmt, err := db.Prepare(sql)
 		if err != nil {
 			log.Printf("InsertIntoOrUpdateUser() error() (INSERT/Prepare) err=%s\n", err.Error())
 			status = -1
@@ -99,7 +102,7 @@ func InsertIntoOrUpdateUser(tnow time.Time, eventid string, roominf RoomInfo) (s
 	} else {
 
 		sql := "select user_name, genre, `rank`, nrank, prank, level, followers, fans, fans_lst from user where userno = ?"
-		err = Db.QueryRow(sql, userno).Scan(&name, &genre, &rank, &nrank, &prank, &level, &followers, &fans, &fans_lst)
+		err = db.QueryRow(sql, userno).Scan(&name, &genre, &rank, &nrank, &prank, &level, &followers, &fans, &fans_lst)
 		if err != nil {
 			log.Printf("err=[%s]\n", err.Error())
 			status = -1
@@ -133,7 +136,7 @@ func InsertIntoOrUpdateUser(tnow time.Time, eventid string, roominf RoomInfo) (s
 			sql += "ts=?,"
 			sql += "currentevent=? "
 			sql += "where userno=?"
-			stmt, err := Db.Prepare(sql)
+			stmt, err := db.Prepare(sql)
 
 			if err != nil {
 				log.Printf("InsertIntoOrUpdateUser() error(Update/Prepare) err=%s\n", err.Error())
@@ -174,7 +177,7 @@ func InsertIntoOrUpdateUser(tnow time.Time, eventid string, roominf RoomInfo) (s
 		sql := "INSERT INTO userhistory(userno, user_name, genre, `rank`, nrank, prank, level, followers, fans, fans_lst, ts)"
 		sql += " VALUES(?,?,?,?,?,?,?,?,?,?,?)"
 		//	log.Printf("sql=%s\n", sql)
-		stmt, err := Db.Prepare(sql)
+		stmt, err := db.Prepare(sql)
 		if err != nil {
 			log.Printf("error(INSERT into userhistory/Prepare) err=%s\n", err.Error())
 			status = -1
