@@ -244,14 +244,14 @@ func UpinsUser[T UserT](
 	default:
 	}
 	log.Printf("UpinsUser() e=%d, xuser type: %T\n", estatus, xuser)
-	if estatus < 2 {
-		switch any(xuser).(type) {
-		case *User, User, *Wuser, Wuser:
-			InsertUserhistory(dbmap, &Userhistory{}, vdata)
-		default:
-			log.Printf("UpinsUser() InsertUserhistory() not executed\n")
-		}
-	}
+	// if estatus < 2 {
+	// 	switch any(xuser).(type) {
+	// 	case *User, User, *Wuser, Wuser:
+	InsertUserhistory(dbmap, &Userhistory{}, vdata)
+	// 	default:
+	// 		log.Printf("UpinsUser() InsertUserhistory() not executed\n")
+	// 	}
+	// }
 
 	/*
 		// テーブル xuser のデータを取得する。
