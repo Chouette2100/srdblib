@@ -92,9 +92,10 @@ import (
 300000  v3を新たに作成する。v2.8.2をベースとする。
 300100  複数データベースサーバーに対応するための機能を追加する。
 300200  userhisotryが更新されていないことが判明したため、いったん無条件にuserhistoryにデータを追加するようにする。
+300301 GetLastUserdataでポインタデバッグライトでのnilチェックを追加する
 */
 
-const Version = "302000"
+const Version = "303001"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

@@ -162,7 +162,11 @@ func GetLastUserdata[T UserT](
 			estatus = 1
 		}
 	}
-	log.Printf(" estatus=%d vdata.ts=%s\n", estatus, vdata.Ts.Format("2006-01-02 15:04:05"))
+	if vdata != nil {
+		log.Printf(" estatus=%d vdata.ts=%s\n", estatus, vdata.Ts.Format("2006-01-02 15:04:05"))
+	} else {
+		log.Printf(" vdat a is nil\n")
+	}
 
 	// if estatus < 2 {
 	// TODO: ここで上で取得しなかったデータを取得すべき
