@@ -8,6 +8,7 @@ package srdblib
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/goark/sshql"
 	"github.com/goark/sshql/mysqldrv"
@@ -79,20 +80,31 @@ func OpenDb(filenameofdbconfig string) (db *sql.DB, dbconfig *DBConfig, err erro
 	if dbconfig.DBport == "" {
 		dbconfig.DBport = "3306"
 	}
-	cnc := "@tcp"
-	if dbconfig.UseSSH {
-		Dialer.Hostname = dbconfig.SSHhost
-		Dialer.Port = dbconfig.SSHport
-		Dialer.Username = dbconfig.SSHuser
-		Dialer.Password = dbconfig.SSHpswd
-		Dialer.PrivateKey = dbconfig.SSHprvkey
+	if strings.Contains(dbconfig.DBhost, "192.168.1.") {
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Asia%%2FTokyo&tls=skip-verify",
+			dbconfig.DBuser,
+			dbconfig.DBpswd,
+			dbconfig.DBhost,
+			dbconfig.DBport,
+			dbconfig.DBname,
+		)
+		db, err = sql.Open("mysql", dsn)
+	} else {
+		cnc := "@tcp"
+		if dbconfig.UseSSH {
+			Dialer.Hostname = dbconfig.SSHhost
+			Dialer.Port = dbconfig.SSHport
+			Dialer.Username = dbconfig.SSHuser
+			Dialer.Password = dbconfig.SSHpswd
+			Dialer.PrivateKey = dbconfig.SSHprvkey
 
-		mysqldrv.New(&Dialer).RegisterDial("ssh+tcp")
-		cnc = "@ssh+tcp"
+			mysqldrv.New(&Dialer).RegisterDial("ssh+tcp")
+			cnc = "@ssh+tcp"
+		}
+		cnc += "(" + dbconfig.DBhost + ":" + dbconfig.DBport + ")"
+		// var db *sql.DB
+		db, err = sql.Open("mysql", dbconfig.DBuser+":"+dbconfig.DBpswd+cnc+"/"+dbconfig.DBname+"?parseTime=true&loc=Asia%2FTokyo")
 	}
-	cnc += "(" + dbconfig.DBhost + ":" + dbconfig.DBport + ")"
-	// var db *sql.DB
-	db, err = sql.Open("mysql", dbconfig.DBuser+":"+dbconfig.DBpswd+cnc+"/"+dbconfig.DBname+"?parseTime=true&loc=Asia%2FTokyo")
 	if err != nil {
 		err = fmt.Errorf("sql.Open(): %w", err)
 	}
