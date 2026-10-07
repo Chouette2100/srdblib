@@ -94,9 +94,10 @@ import (
 300200  userhisotryが更新されていないことが判明したため、いったん無条件にuserhistoryにデータを追加するようにする。
 300301 GetLastUserdataでポインタデバッグライトでのnilチェックを追加する
 300400 VPS内部のLANを使用する場合に対応する（DBHost=="192.168.1.*"のとき）
+300401 GetLastUserdata[T UserT]()のデバッグライトを対象がnilでない場合に限定する
 */
 
-const Version = "300400"
+const Version = "300401"
 
 type Environment struct {
 	//	Intervalhour int	`yaml:"Intervalhour"`

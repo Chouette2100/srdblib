@@ -153,6 +153,7 @@ func GetLastUserdata[T UserT](
 		return
 	} else if vdata == nil {
 		// userテーブルのデータが存在しない
+		log.Printf(" vdat a is nil\n")
 		estatus = 0
 	} else {
 		// userテーブルのデータを仮の戻り値とする
@@ -162,11 +163,11 @@ func GetLastUserdata[T UserT](
 			estatus = 1
 		}
 	}
-	if vdata != nil {
-		log.Printf(" estatus=%d vdata.ts=%s\n", estatus, vdata.Ts.Format("2006-01-02 15:04:05"))
-	} else {
-		log.Printf(" vdat a is nil\n")
-	}
+	// if vdata != nil {
+	// 	log.Printf(" estatus=%d vdata.ts=%s\n", estatus, vdata.Ts.Format("2006-01-02 15:04:05"))
+	// } else {
+	// 	log.Printf(" vdat a is nil\n")
+	// }
 
 	// if estatus < 2 {
 	// TODO: ここで上で取得しなかったデータを取得すべき
@@ -176,8 +177,10 @@ func GetLastUserdata[T UserT](
 		err = fmt.Errorf("Get(%d): database access error", userno)
 		return
 	} else if tdata == nil {
+		log.Printf(" tdat a is nil\n")
 		return
 	} else {
+		log.Printf(" estatus=%d tdata.ts=%s\n", estatus, tdata.Ts.Format("2006-01-02 15:04:05"))
 		// vdata = tdata
 		// if vdata.Ts.After(time.Now().Add(time.Duration(-Env.Lmin) * time.Minute)) {
 		if tdata.Ts.After(time.Now().Add(time.Duration(-Env.Lmin) * time.Minute)) {
@@ -186,14 +189,13 @@ func GetLastUserdata[T UserT](
 			}
 		}
 		if vdata != nil {
+			log.Printf(" estatus=%d vdata.ts=%s\n", estatus, vdata.Ts.Format("2006-01-02 15:04:05"))
 			if tdata.Ts.After(vdata.Ts) {
 				vdata = tdata
 			}
 		}
 	}
 	// }
-	log.Printf(" estatus=%d vdata.ts=%s\n", estatus, vdata.Ts.Format("2006-01-02 15:04:05"))
-	log.Printf(" estatus=%d vdata.ts=%s\n", estatus, vdata.Ts.Format("2006-01-02 15:04:05"))
 	return
 }
 
